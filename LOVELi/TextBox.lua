@@ -138,6 +138,12 @@ function LOVELi.TextBox:init(layoutmanager) -- override
 	layoutmanager:subscribe("mousepressed", self, function(x, y, button, istouch, presses)
 		--TODO: Cursor
 	end)
+	layoutmanager:subscribe("focused", self, function()
+		love.keyboard.setTextInput(true)
+	end)
+	layoutmanager:subscribe("unfocused", self, function()
+		love.keyboard.setTextInput(false)
+	end)
 end
 function LOVELi.TextBox:measure(availablewidth, availableheight) -- override
 	local function measure(dimension, availabledimension)

@@ -179,42 +179,72 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 			direction = "d"
 		end		
 		if direction == "u" or direction == "d" then
-			local controls = self:getcontrols()
+			local controls = self:getvisiblecontrols()
+			local oldfocusedcontrol = self.focusedcontrol
+			local newfocusedcontrol	= 0
 			if direction == "u" then
-				if self.focusedcontrol == 0 then
-					self.focusedcontrol = 1
-				end				
+				local focusedcontrol = oldfocusedcontrol
+				if focusedcontrol == 0 then
+					focusedcontrol = 1
+				end
 				for i = 1, #controls - 1 do
-					local j = self.focusedcontrol - i
+					local j = focusedcontrol - i
 					if j < 1 then
 						j = j + #controls
 					end
 					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getfocusable() then
-						self.focusedcontrol = j
+						newfocusedcontrol = j
 						break
 					end
 				end
 			else
+				local focusedcontrol = oldfocusedcontrol
 				for i = 1, #controls - 1 do
-					local j = self.focusedcontrol + i
+					local j = focusedcontrol + i
 					if j > #controls then
 						j = j - #controls
 					end
 					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getfocusable() then
-						self.focusedcontrol = j
+						newfocusedcontrol = j
 						break
 					end
 				end
 			end
-		end
-		if self.focusedcontrol > 0 then
-			local events = self:geteventhandler("keypressed")
-			if events then
-				local controls = self:getcontrols()
-				for _, event in ipairs(events) do
-					if event.control == controls[self.focusedcontrol] then
-						event.callback(key, scancode, isrepeat)
-						break
+			if oldfocusedcontrol ~= newfocusedcontrol then
+				if oldfocusedcontrol > 0 then					
+					local events = self:geteventhandler("unfocused")
+					if events then
+						for _, event in ipairs(events) do
+							if event.control == controls[oldfocusedcontrol] then
+								event.callback()
+								break
+							end
+						end
+					end
+				end
+				if newfocusedcontrol > 0 then
+					local events = self:geteventhandler("focused")
+					if events then
+						for _, event in ipairs(events) do
+							if event.control == controls[newfocusedcontrol] then
+								event.callback()
+								break
+							end
+						end
+					end
+				end
+				self.focusedcontrol = newfocusedcontrol
+			end
+		else
+			if self.focusedcontrol > 0 then
+				local events = self:geteventhandler("keypressed")
+				if events then
+					local controls = self:getvisiblecontrols()
+					for _, event in ipairs(events) do
+						if event.control == controls[self.focusedcontrol] then
+							event.callback(key, scancode, isrepeat)
+							break
+						end
 					end
 				end
 			end
@@ -226,7 +256,7 @@ function LOVELi.LayoutManager:textinput(text)
 		if self.focusedcontrol > 0 then
 			local events = self:geteventhandler("textinput")
 			if events then
-				local controls = self:getcontrols()
+				local controls = self:getvisiblecontrols()
 				for _, event in ipairs(events) do
 					if event.control == controls[self.focusedcontrol] then
 						event.callback(text)
@@ -239,11 +269,13 @@ function LOVELi.LayoutManager:textinput(text)
 end
 function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 	if self:getisenabled() then
-		self.focusedcontrol = 0
+		local controls = self:getvisiblecontrols()
+		local oldfocusedcontrol = self.focusedcontrol
+		local newfocusedcontrol = 0
 		local events = self:geteventhandler("mousepressed")
-		if events then			
+		if events then
 			for _, event in ipairs(events) do
-				if event.control:getisvisible() and event.control:getisenabled() then		
+				if event.control:getisvisible() and event.control:getisenabled() then
 					local renderwidth = event.control:getrenderwidth()
 					local renderheight = event.control:getrenderheight()
 					if renderwidth > 0 and renderheight > 0 then
@@ -252,10 +284,9 @@ function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 						if x > renderx and x < renderx + renderwidth and y > rendery and y < rendery + renderheight then
 							event.callback(x - renderx, y - rendery, button, istouch, presses)
 							if event.control:getfocusable() then
-								local controls = self:getcontrols()
 								for j = 1, #controls do
 									if controls[j] == event.control then
-										self.focusedcontrol = j
+										newfocusedcontrol = j
 										break
 									end
 								end
@@ -265,6 +296,31 @@ function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 					end
 				end
 			end
+		end
+		if oldfocusedcontrol ~= newfocusedcontrol then
+			if oldfocusedcontrol > 0 then
+				local events = self:geteventhandler("unfocused")
+				if events then
+					for _, event in ipairs(events) do
+						if event.control == controls[oldfocusedcontrol] then
+							event.callback()
+							break
+						end
+					end
+				end
+			end
+			if newfocusedcontrol > 0 then
+				local events = self:geteventhandler("focused")
+				if events then
+					for _, event in ipairs(events) do
+						if event.control == controls[newfocusedcontrol] then
+							event.callback()
+							break
+						end
+					end
+				end
+			end
+			self.focusedcontrol = newfocusedcontrol
 		end
 	end
 end
