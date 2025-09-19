@@ -28,3 +28,6 @@ dofile("examples/controls.lua")
 
 -- Uncomment to see User Control (aka composite control) example:
 --dofile("examples/usercontrol.lua")
+
+-- Uncomment to see Custom Control example:
+--dofile("examples/customcontrol.lua")

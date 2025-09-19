@@ -21,24 +21,12 @@
 -- SOFTWARE.
 
 local loveli = require("LOVELi")
-function card(width, height, title, text)
-	return loveli.Border:new{ width = width, height = height, backgroundcolor = loveli.Color.parse(0xFFFFFFFF) } 
-		:with(loveli.StackLayout:new{ orientation = "vertical", width = "*", height = "*" }
-			:with(loveli.Border:new{ padding = loveli.Thickness.parse(10), width = "*", height = "auto" } 
-				:with(loveli.Label:new{ text = title, font = love.graphics.newFont(18), width = "*", height = "auto" } )
-			)
-			:with(loveli.Border:new{ padding = loveli.Thickness.parse(10), width = "*", height = "*" } 
-				:with(loveli.Label:new{ text = text, ismultiline = true, horizontaltextalignment = "start", verticaltextalignment = "start", width = "*", height = "*" } )
-			)
-		)
-end
+dofile("Loveli/CustomControls/AnimatedLabel.lua")
 function love.load(arg)
 	enabledebugger(arg)	
 	layoutmanager = loveli.LayoutManager:new{}
-		:with(loveli.StackLayout:new{ orientation = "horizontal", spacing = 10, width = "*", height = "auto", margin = loveli.Thickness.parse(10) }
-			:with(card(150, 180, "Card 1", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In lorem metus, venenatis ac purus vehicula, aliquam congue metus.") )
-			:with(card(150, 180, "Card 2", "Aenean et felis efficitur, fringilla dui a, bibendum lectus. Sed magna risus, posuere placerat tincidunt ut, blandit non mauris.") )
-			:with(card(150, 180, "Card 3", "Fusce vel arcu nec sem placerat commodo nec at odio. Nullam eleifend ullamcorper varius.") )
+		:with(loveli.Border:new{ width = 300, height = 100, backgroundcolor = loveli.Color.parse(0xFFFFFFFF), margin = loveli.Thickness.parse(10) }
+			:with(loveli.AnimatedLabel:new{ isplaying = true, duration = 10, elapsed = 0, text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque interdum nec sapien at mollis. Nam non felis eu augue vestibulum eleifend quis gravida erat. Maecenas porta urna vehicula enim efficitur, eu gravida nisi faucibus.", ismultiline = true, width = "*", height = "*" } )
 		)
 end
 function love.keypressed(key, scancode, isrepeat)
