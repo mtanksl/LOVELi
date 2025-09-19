@@ -70,172 +70,187 @@ function LOVELi.Grid:addcolumn(width)
 	table.insert(self.columns,  LOVELi.ColumnDefinition:new(width) )
 end
 function LOVELi.Grid:measure(availablewidth, availableheight) -- override
+	--TODO: Handle invisible child
 	if availablewidth then
-		if self:getwidth() == "*" then
-			self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
-		elseif self:getwidth() == "auto" then
-			self.desiredwidth = availablewidth - self:getmargin():gethorizontal()
+		if not self:getisvisible() then
+			self.desiredwidth = 0 
+			for _, control in ipairs(self:getcontrols() ) do
+				control:measure(0, nil)
+			end
 		else
-			self.desiredwidth = self:getwidth() 
-		end				
-		local widthremaining = self:getdesiredwidth()
-		local widthproportions = 0
-		for i = 1, #self.columns do
-			local column = self.columns[i]
-			if type(column:getwidth() ) == "number" then
-				for j = 1, #self.rows do
-					local controls = self:getcontrol(j, i)
-					if controls then
-						for _, control in ipairs(controls) do
-							control:measure(column:getwidth() , nil)
+			if self:getwidth() == "*" then
+				self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+			elseif self:getwidth() == "auto" then
+				self.desiredwidth = availablewidth - self:getmargin():gethorizontal()
+			else
+				self.desiredwidth = self:getwidth() 
+			end				
+			local widthremaining = self:getdesiredwidth()
+			local widthproportions = 0
+			for i = 1, #self.columns do
+				local column = self.columns[i]
+				if type(column:getwidth() ) == "number" then
+					for j = 1, #self.rows do
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								control:measure(column:getwidth(), nil)
+							end
 						end
 					end
-				end
-				column.desiredwidth = column:getwidth()
-				widthremaining = widthremaining - column:getdesiredwidth()
-			elseif column:getwidth() == "auto" then
-				local maxwidth = 0
-				local skipped = {}
-				for j = 1, #self.rows do
-					local controls = self:getcontrol(j, i)
-					if controls then
-						for _, control in ipairs(controls) do
-							if control:getwidth() == "*" then
-								table.insert(skipped, control)
-							else
-								control:measure(math.huge, nil)
-								local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
-								if width > maxwidth then
-									maxwidth = width
+					column.desiredwidth = column:getwidth()
+					widthremaining = widthremaining - column:getdesiredwidth()
+				elseif column:getwidth() == "auto" then
+					local maxwidth = 0
+					local skipped = {}
+					for j = 1, #self.rows do
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								if control:getwidth() == "*" then
+									table.insert(skipped, control)
+								else
+									control:measure(math.huge, nil)
+									local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
+									if width > maxwidth then
+										maxwidth = width
+									end
 								end
 							end
 						end
 					end
-				end
-				if #skipped > 0 then
-					if maxwidth == 0 then
-						--TODO: Warning?
-					end
-					for _, control in ipairs(skipped) do
-						control:measure(maxwidth, nil)
-					end
-				end
-				column.desiredwidth = maxwidth
-				widthremaining = widthremaining - column:getdesiredwidth()
-			else
-				if self:getwidth() == "auto" then
-					error("Can not use \"*\" width column definition inside an \"auto\" width Grid.")
-				end
-				local proportion = tonumber(string.sub(column:getwidth(), 1, -2) )
-				widthproportions = widthproportions + proportion
-			end
-		end
-		local sumwidth = 0
-		for i = 1, #self.columns do
-			local column = self.columns[i]
-			if type(column:getwidth() ) == "number" then
-			elseif column:getwidth() == "auto" then
-			else
-				local proportion = tonumber(string.sub(column:getwidth(), 1, -2) )
-				for j = 1, #self.rows do
-					local controls = self:getcontrol(j, i)
-					if controls then
-						for _, control in ipairs(controls) do
-							control:measure(widthremaining * proportion / widthproportions, nil)
+					if #skipped > 0 then
+						if maxwidth == 0 then
+							--TODO: Warning?
+						end
+						for _, control in ipairs(skipped) do
+							control:measure(maxwidth, nil)
 						end
 					end
+					column.desiredwidth = maxwidth
+					widthremaining = widthremaining - column:getdesiredwidth()
+				else
+					if self:getwidth() == "auto" then
+						error("Can not use \"*\" width column definition inside an \"auto\" width Grid.")
+					end
+					local proportion = tonumber(string.sub(column:getwidth(), 1, -2) )
+					widthproportions = widthproportions + proportion
 				end
-				column.desiredwidth = widthremaining * proportion / widthproportions
 			end
-			column.x = sumwidth
-			sumwidth = sumwidth + column:getdesiredwidth()
-		end
-		if self:getwidth()  == "auto" then			
-			self.desiredwidth = sumwidth
+			local sumwidth = 0
+			for i = 1, #self.columns do
+				local column = self.columns[i]
+				if type(column:getwidth() ) == "number" then
+				elseif column:getwidth() == "auto" then
+				else
+					local proportion = tonumber(string.sub(column:getwidth(), 1, -2) )
+					for j = 1, #self.rows do
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								control:measure(widthremaining * proportion / widthproportions, nil)
+							end
+						end
+					end
+					column.desiredwidth = widthremaining * proportion / widthproportions
+				end
+				column.x = sumwidth
+				sumwidth = sumwidth + column:getdesiredwidth()
+			end
+			if self:getwidth()  == "auto" then			
+				self.desiredwidth = sumwidth
+			end
 		end
 	end
 	if availableheight then
-		if self:getheight() == "*" then
-			self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
-		elseif self:getheight() == "auto" then
-			self.desiredheight = availableheight - self:getmargin():getvertical()
+		if not self:getisvisible() then
+			self.desiredheight = 0 
+			for _, control in ipairs(self:getcontrols() ) do
+				control:measure(nil, 0)
+			end
 		else
-			self.desiredheight = self:getheight()
-		end		
-		local heightremaining = self:getdesiredheight()
-		local heightproportions = 0
-		for j = 1, #self.rows do
-			local row = self.rows[j]
-			if type(row:getheight() ) == "number" then
-				for i = 1, #self.columns do
-					local controls = self:getcontrol(j, i)
-					if controls then
-						for _, control in ipairs(controls) do
-							control:measure(nil, row:getheight() )
+			if self:getheight() == "*" then
+				self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+			elseif self:getheight() == "auto" then
+				self.desiredheight = availableheight - self:getmargin():getvertical()
+			else
+				self.desiredheight = self:getheight()
+			end		
+			local heightremaining = self:getdesiredheight()
+			local heightproportions = 0
+			for j = 1, #self.rows do
+				local row = self.rows[j]
+				if type(row:getheight() ) == "number" then
+					for i = 1, #self.columns do
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								control:measure(nil, row:getheight() )
+							end
 						end
-					end
-				end				
-				row.desiredheight = row:getheight()
-				heightremaining = heightremaining - row:getdesiredheight()
-			elseif row:getheight() == "auto" then
-				local maxheight = 0
-				local skipped = {}
-				for i = 1, #self.columns do
-					local controls = self:getcontrol(j, i)
-					if controls then
-						for _, control in ipairs(controls) do
-							if control.height == "*" then
-								table.insert(skipped, control)
-							else
-								control:measure(nil, math.huge)
-								local height = control:getdesiredheight() + control:getmargin():gethorizontal()
-								if height > maxheight then
-									maxheight = height
+					end				
+					row.desiredheight = row:getheight()
+					heightremaining = heightremaining - row:getdesiredheight()
+				elseif row:getheight() == "auto" then
+					local maxheight = 0
+					local skipped = {}
+					for i = 1, #self.columns do
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								if control.height == "*" then
+									table.insert(skipped, control)
+								else
+									control:measure(nil, math.huge)
+									local height = control:getdesiredheight() + control:getmargin():gethorizontal()
+									if height > maxheight then
+										maxheight = height
+									end
 								end
 							end
 						end
 					end
-				end
-				if #skipped > 0 then
-					if maxheight == 0 then
-						--TODO: Warning?
-					end
-					for _, control in ipairs(skipped) do
-						control:measure(nil, maxheight)
-					end
-				end
-				row.desiredheight = maxheight
-				heightremaining = heightremaining - row:getdesiredheight()
-			else
-				if self:getheight() == "auto" then
-					error("Can not use \"*\" height row definition inside an \"auto\" height Grid.")
-				end
-				local proportion = tonumber(string.sub(row:getheight(), 1, -2) )
-				heightproportions = heightproportions + proportion
-			end
-		end
-		local sumheight = 0
-		for j = 1, #self.rows do
-			local row = self.rows[j]
-			if type(row:getheight() ) == "number" then
-			elseif row:getheight() == "auto" then
-			else
-				local proportion = tonumber(string.sub(row:getheight(), 1, -2) )
-				for i = 1, #self.columns do
-					local controls = self:getcontrol(j, i)
-					if controls then
-						for _, control in ipairs(controls) do
-							control:measure(nil, heightremaining * proportion / heightproportions)
+					if #skipped > 0 then
+						if maxheight == 0 then
+							--TODO: Warning?
+						end
+						for _, control in ipairs(skipped) do
+							control:measure(nil, maxheight)
 						end
 					end
+					row.desiredheight = maxheight
+					heightremaining = heightremaining - row:getdesiredheight()
+				else
+					if self:getheight() == "auto" then
+						error("Can not use \"*\" height row definition inside an \"auto\" height Grid.")
+					end
+					local proportion = tonumber(string.sub(row:getheight(), 1, -2) )
+					heightproportions = heightproportions + proportion
 				end
-				row.desiredheight = heightremaining * proportion / heightproportions
 			end
-			row.y = sumheight
-			sumheight = sumheight + row:getdesiredheight()
-		end
-		if self:getheight() == "auto" then			
-			self.desiredheight = sumheight
+			local sumheight = 0
+			for j = 1, #self.rows do
+				local row = self.rows[j]
+				if type(row:getheight() ) == "number" then
+				elseif row:getheight() == "auto" then
+				else
+					local proportion = tonumber(string.sub(row:getheight(), 1, -2) )
+					for i = 1, #self.columns do
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								control:measure(nil, heightremaining * proportion / heightproportions)
+							end
+						end
+					end
+					row.desiredheight = heightremaining * proportion / heightproportions
+				end
+				row.y = sumheight
+				sumheight = sumheight + row:getdesiredheight()
+			end
+			if self:getheight() == "auto" then			
+				self.desiredheight = sumheight
+			end
 		end
 	end
 end

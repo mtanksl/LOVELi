@@ -49,25 +49,35 @@ function LOVELi.AbsoluteLayout:measure(availablewidth, availableheight) -- overr
 		local function getcontroldimensionrequest(control) if dimension == "width" then return control:getdesiredwidth() else return control:getdesiredheight() end end
 		local function getcontrolmeasure(control, value) if dimension == "width" then control:measure(value, nil) else control:measure(nil, value) end return getcontroldimensionrequest(control) + getcontroldimensionmargin(control) end
 		if availabledimension then
-			if getdimension() == "*" then
-				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-			elseif getdimension() == "auto" then
-				setdesireddimension(availabledimension - getdimensionmargin() )
+			if not self:getisvisible() then
+				setdesireddimension(0)
+				for _, control in ipairs(self:getcontrols() ) do
+					getcontrolmeasure(control, 0)
+				end
 			else
-				setdesireddimension(getdimension() )
-			end
-			local maxdimension = 0
-			for _, control in ipairs(self:getcontrols() ) do
-				if getcontroldimension(control) == "*" and getdimension() == "auto" then
-					error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " AbsoluteLayout.")
+				if getdimension() == "*" then
+					setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
+				elseif getdimension() == "auto" then
+					setdesireddimension(availabledimension - getdimensionmargin() )
+				else
+					setdesireddimension(getdimension() )
 				end
-				local controldimension = getcontrolmeasure(control, getdesireddimension() - getcontrolaxis(control) ) + getcontrolaxis(control)
-				if controldimension > maxdimension then
-					maxdimension = controldimension
+				local maxdimension = 0
+				for _, control in ipairs(self:getcontrols() ) do
+					if getcontroldimension(control) == "*" and getdimension() == "auto" then
+						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " AbsoluteLayout.")
+					end
+					local controldimension = getcontrolmeasure(control, getdesireddimension() - getcontrolaxis(control) )
+					if controldimension > 0 then
+						controldimension = controldimension + getcontrolaxis(control)
+						if controldimension > maxdimension then
+							maxdimension = controldimension
+						end
+					end
 				end
-			end
-			if getdimension() == "auto" then
-				setdesireddimension(maxdimension)
+				if getdimension() == "auto" then
+					setdesireddimension(maxdimension)
+				end
 			end
 		end
 	end

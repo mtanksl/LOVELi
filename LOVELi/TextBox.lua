@@ -106,7 +106,7 @@ end
 function LOVELi.TextBox:setbordercolor(value)
 	self.bordercolor:setvalue(value)
 end
-function LOVELi.TextBox:getfocusable() -- override
+function LOVELi.TextBox:getisfocusable() -- override
 	return true
 end
 function LOVELi.TextBox:init(layoutmanager) -- override
@@ -154,7 +154,9 @@ function LOVELi.TextBox:measure(availablewidth, availableheight) -- override
 		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
 		local function getfontdimension() if dimension == "width" then return self:getfont():getWidth(self:gettext() ) else return self:getfont():getHeight() end end
 		if availabledimension then
-			if getdimension() == "*" then
+			if not self:getisvisible() then
+				setdesireddimension(0)
+			elseif getdimension() == "*" then
 				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
 			elseif getdimension() == "auto" then
 				setdesireddimension(getfontdimension() )

@@ -207,7 +207,7 @@ function LOVELi.View:invalidate()
 		self.layoutmanager:invalidate(self)
 	end
 end
-function LOVELi.View:getfocusable() -- virtual
+function LOVELi.View:getisfocusable() -- virtual
 	return false
 end
 function LOVELi.View:init(layoutmanager) -- virtual
@@ -224,7 +224,9 @@ function LOVELi.View:measure(availablewidth, availableheight) -- virtual
 		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
 		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
 		if availabledimension then
-			if getdimension() == "*" then
+			if not self:getisvisible() then
+				setdesireddimension(0)
+			elseif getdimension() == "*" then
 				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
 			elseif getdimension() == "auto" then
 				error("View can not be set to auto.")

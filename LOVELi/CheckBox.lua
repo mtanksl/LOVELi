@@ -63,7 +63,7 @@ end
 function LOVELi.CheckBox:setbordercolor(value)
 	self.bordercolor:setvalue(value)
 end
-function LOVELi.CheckBox:getfocusable() -- override
+function LOVELi.CheckBox:getisfocusable() -- override
 	return true
 end
 function LOVELi.CheckBox:init(layoutmanager) -- override
@@ -99,7 +99,9 @@ function LOVELi.CheckBox:measure(availablewidth, availableheight) -- override
 		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
 		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
 		if availabledimension then
-			if getdimension() == "*" then
+			if not self:getisvisible() then
+				setdesireddimension(0)
+			elseif getdimension() == "*" then
 				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
 			elseif getdimension() == "auto" then
 				setdesireddimension(auto)

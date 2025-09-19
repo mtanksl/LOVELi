@@ -31,6 +31,7 @@ local classes = {
 	"ColumnDefinition",
 	-- View
 	"View",
+	"GraphicsView",
 	"Label",
 	"Button",
 	"Image",

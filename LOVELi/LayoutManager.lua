@@ -192,7 +192,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 					if j < 1 then
 						j = j + #controls
 					end
-					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getfocusable() then
+					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getisfocusable() then
 						newfocusedcontrol = j
 						break
 					end
@@ -204,7 +204,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 					if j > #controls then
 						j = j - #controls
 					end
-					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getfocusable() then
+					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getisfocusable() then
 						newfocusedcontrol = j
 						break
 					end
@@ -283,7 +283,7 @@ function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 						local rendery = event.control:getrendery()
 						if x > renderx and x < renderx + renderwidth and y > rendery and y < rendery + renderheight then
 							event.callback(x - renderx, y - rendery, button, istouch, presses)
-							if event.control:getfocusable() then
+							if event.control:getisfocusable() then
 								for j = 1, #controls do
 									if controls[j] == event.control then
 										newfocusedcontrol = j

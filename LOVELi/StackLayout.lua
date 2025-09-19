@@ -45,6 +45,7 @@ function LOVELi.StackLayout:with(control)
 end
 function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
 	local function measure(dimension, availabledimension)	
+		--TODO: Handle invisible child
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
 		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
 		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
@@ -56,52 +57,59 @@ function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
 		local function getcontroldimensionrequest(control) if dimension == "width" then return control:getdesiredwidth() else return control:getdesiredheight() end end
 		local function getcontrolmeasure(control, value) if dimension == "width" then control:measure(value, nil) else control:measure(nil, value) end return getcontroldimensionrequest(control) + getcontroldimensionmargin(control) end
 		if availabledimension then
-			if getdimension() == "*" then
-				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-			elseif getdimension() == "auto" then
-				setdesireddimension(availabledimension - getdimensionmargin() )
-			else
-				setdesireddimension(getdimension() )
-			end
-			local maxdimension = 0
-			local remaining = getdesireddimension()
-			if (dimension == "width" and self:getorientation() == "horizontal") or (dimension == "height" and self:getorientation() == "vertical") then
-				local proportions = 0
-				local spacing = 0
+			if not self:getisvisible() then
+				setdesireddimension(0)
 				for _, control in ipairs(self:getcontrols() ) do
-					if getcontroldimension(control) == "*" then
-						if getdimension() == "auto" then
-							error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " StackLayout.")
+					getcontrolmeasure(control, 0)
+				end
+			else
+				if getdimension() == "*" then
+					setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
+				elseif getdimension() == "auto" then
+					setdesireddimension(availabledimension - getdimensionmargin() )
+				else
+					setdesireddimension(getdimension() )
+				end
+				local maxdimension = 0
+				local remaining = getdesireddimension()
+				if (dimension == "width" and self:getorientation() == "horizontal") or (dimension == "height" and self:getorientation() == "vertical") then
+					local proportions = 0
+					local spacing = 0
+					for _, control in ipairs(self:getcontrols() ) do
+						if getcontroldimension(control) == "*" then
+							if getdimension() == "auto" then
+								error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " StackLayout.")
+							end
+							proportions = proportions + 1
+						else
+							local controldimension = getcontrolmeasure(control, remaining - spacing) + spacing
+							maxdimension = maxdimension + controldimension
+							remaining = remaining - controldimension
 						end
-						proportions = proportions + 1
-					else
-						local controldimension = getcontrolmeasure(control, remaining - spacing) + spacing
-						maxdimension = maxdimension + controldimension
-						remaining = remaining - controldimension
+						spacing = self:getspacing()
 					end
-					spacing = self:getspacing()
-				end
-				spacing = 0
-				for _, control in ipairs(self:getcontrols() ) do
-					if getcontroldimension(control) == "*" then
-						local controldimension = getcontrolmeasure(control, remaining * 1 / proportions - spacing) + spacing
-						maxdimension = maxdimension + controldimension
+					spacing = 0
+					for _, control in ipairs(self:getcontrols() ) do
+						if getcontroldimension(control) == "*" then
+							local controldimension = getcontrolmeasure(control, remaining * 1 / proportions - spacing) + spacing
+							maxdimension = maxdimension + controldimension
+						end
+						spacing = self:getspacing()
 					end
-					spacing = self:getspacing()
-				end
-			else
-				for _, control in ipairs(self:getcontrols() ) do
-					if getcontroldimension(control) == "*" and getdimension() == "auto" then
-						error("Can not use \"*\" control inside an \"auto\" StackLayout.")
-					end
-					local controldimension = getcontrolmeasure(control, remaining)
-					if controldimension > maxdimension then
-						maxdimension = controldimension
+				else
+					for _, control in ipairs(self:getcontrols() ) do
+						if getcontroldimension(control) == "*" and getdimension() == "auto" then
+							error("Can not use \"*\" control inside an \"auto\" StackLayout.")
+						end
+						local controldimension = getcontrolmeasure(control, remaining)
+						if controldimension > maxdimension then
+							maxdimension = controldimension
+						end
 					end
 				end
-			end
-			if getdimension() == "auto" then
-				setdesireddimension(maxdimension)
+				if getdimension() == "auto" then
+					setdesireddimension(maxdimension)
+				end
 			end
 		end
 	end

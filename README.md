@@ -2,7 +2,7 @@
 
 A [LÖVE 2D](https://love2d.org/) retained mode layout and GUI library.
 Includes StackLayout, AbsoluteLayout and Grid layouts.
-Includes Label, Button, Image, CheckBox, RadioButton, Swich, ProgressBar, Slider, TextBox and Border controls.
+Includes Label, Button, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, Border and GraphicsView controls.
 This library was inspired by .NET's MAUI controls.
 Tested on version 11.5.
 
@@ -209,6 +209,14 @@ local border = loveli.Border:new{ padding = loveli.Thickness.parse(10) }
   :with(textbox)
 ```
 
+### GraphicsView
+
+GraphicsView is a graphics canvas on which 2D graphics can be drawn. 
+
+```lua
+local graphicsview = loveli.GraphicsView:new{ drawable = function(sender, x, y, width, height) end, width = "*", height = "**" }
+```
+
 # Keyboard Accessibility
 
 This library supports `tab`, `shift + tab`, `down` arrow and `up` arrow for navigation, `space` and `return` for action.
@@ -216,7 +224,6 @@ This library supports `tab`, `shift + tab`, `down` arrow and `up` arrow for navi
 # Joystick Accessibility
 
 This library supports `down` hat and `up` hat for navigation, `any button` for action.
-
 
 # Support Us
 
