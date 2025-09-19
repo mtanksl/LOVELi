@@ -205,10 +205,10 @@ local textbox = loveli.TextBox:new{ text = "TextBox", ispassword = false, textch
 
 ### Border
 
-Border is a container control that adds padding around another control. 
+Border is a container control that adds padding, draws a border, background, or both, around another control. 
 
 ```lua
-local border = loveli.Border:new{ padding = loveli.Thickness.parse(10) }
+local border = loveli.Border:new{ padding = loveli.Thickness.parse(10), bordercolor = loveli.Color.parse(0x00000000), backgroundcolor = loveli.Color.parse(0x00000000) }
   :with(textbox)
 ```
 

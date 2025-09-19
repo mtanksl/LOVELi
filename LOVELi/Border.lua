@@ -23,9 +23,10 @@
 LOVELi.Border = {}
 LOVELi.Border.__index = LOVELi.Border
 setmetatable(LOVELi.Border, LOVELi.View)
-function LOVELi.Border:new(options) -- LOVELi.Border LOVELi.Border:new( { LOVELi.Thickness padding, LOVELi.Color bordercolor, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.Border:new(options) -- LOVELi.Border LOVELi.Border:new( { LOVELi.Thickness padding, LOVELi.Color backgroundcolor, LOVELi.Color bordercolor, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
 	o.padding = LOVELi.Property.parse(options.padding or LOVELi.Thickness.parse(0) )
+	o.backgroundcolor = LOVELi.Property.parse(options.backgroundcolor or LOVELi.Color.parse(0x00000000) )
 	o.bordercolor = LOVELi.Property.parse(options.bordercolor or LOVELi.Color.parse(0x00000000) )
 	o.internalcontrol = nil
 	return o
@@ -35,6 +36,12 @@ function LOVELi.Border:getpadding()
 end
 function LOVELi.Border:setpadding(value)
 	self.padding:setvalue(value)
+end
+function LOVELi.Border:getbackgroundcolor()
+	return self.backgroundcolor:getvalue()
+end
+function LOVELi.Border:setbackgroundcolor(value)
+	self.backgroundcolor:setvalue(value)
 end
 function LOVELi.Border:getbordercolor()
 	return self.bordercolor:getvalue()
@@ -174,6 +181,13 @@ function LOVELi.Border:render(x, y) -- override
 				self:getdesiredheight() - self:getpadding():getvertical() )
 		end
 	end
+	love.graphics.setColor(self:getbackgroundcolor():getred(), self:getbackgroundcolor():getgreen(), self:getbackgroundcolor():getblue(), self:getbackgroundcolor():getalpha() )	
+	love.graphics.rectangle(
+		"fill", 
+		x + self:getmargin():getleft(), 
+		y + self:getmargin():gettop(), 
+		self:getdesiredwidth(), 
+		self:getdesiredheight() )
 	love.graphics.setColor(self:getbordercolor():getred(), self:getbordercolor():getgreen(), self:getbordercolor():getblue(), self:getbordercolor():getalpha() )
 	love.graphics.rectangle(
 		"line",

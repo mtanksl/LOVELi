@@ -143,10 +143,10 @@ function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight,
 				control:getdesiredwidth() + control:getmargin():gethorizontal(), 
 				control:getdesiredheight() + control:getmargin():getvertical(),
 				
-				LOVELi.clipx(viewportx, screenx + self:getmargin():getleft() ),
-				LOVELi.clipy(viewporty, screeny + self:getmargin():gettop() ),
-				LOVELi.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft(), self:getdesiredwidth() ),
-				LOVELi.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop(), self:getdesiredheight() )				
+				LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() ),
+				LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() ),
+				LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft(), self:getdesiredwidth() ),
+				LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop(), self:getdesiredheight() )				
 			)
 			offsetx = offsetx + control:getdesiredwidth() + control:getmargin():gethorizontal() + self:getspacing()
 		else			
