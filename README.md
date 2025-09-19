@@ -34,6 +34,9 @@ end
 function love.mousepressed(x, y, button, istouch, presses)
   layoutmanager:mousepressed(x, y, button, istouch, presses)
 end
+function love.mousemoved(x, y, dx, dy, istouch)
+  layoutmanager:mousemoved(x, y, dx, dy, istouch)
+end
 function love.joystickhat(joystick, hat, direction)
   layoutmanager:joystickhat(joystick, hat, direction)
 end
@@ -130,9 +133,9 @@ loveli.Button:new{
     y = 0,
     width = "auto",
     height = "auto",
-    minwidth = -1,
+    minwidth = 0,
     minheight = math.huge,
-    maxwidth = -1,
+    maxwidth = 0,
     maxheight = math.huge,
     margin = loveli.Thickness.parse(0),
     horizontaloptions = "start",
@@ -214,7 +217,7 @@ local border = loveli.Border:new{ padding = loveli.Thickness.parse(10) }
 GraphicsView is a graphics canvas on which 2D graphics can be drawn. 
 
 ```lua
-local graphicsview = loveli.GraphicsView:new{ drawable = function(sender, x, y, width, height) end, width = "*", height = "**" }
+local graphicsview = loveli.GraphicsView:new{ drawable = function(sender, x, y, width, height) end, width = "*", height = "*" }
 ```
 
 # Keyboard Accessibility

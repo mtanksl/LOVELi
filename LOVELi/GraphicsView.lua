@@ -23,13 +23,13 @@
 LOVELi.GraphicsView = {}
 LOVELi.GraphicsView.__index = LOVELi.GraphicsView
 setmetatable(LOVELi.GraphicsView, LOVELi.View)
-function LOVELi.GraphicsView:new(options) -- LOVELi.GraphicsView LOVELi.GraphicsView:new( { Action<int x, int y, int width, int height> drawable, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.GraphicsView:new(options) -- LOVELi.GraphicsView LOVELi.GraphicsView:new( { Action<GraphicsView sender, int x, int y, int width, int height> drawable, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
 	o.drawable = options.drawable
 	return o
 end
-function LOVELi.GraphicsView:getdraw()
-	return self.draw
+function LOVELi.GraphicsView:getdrawable()
+	return self.drawable
 end
 function LOVELi.GraphicsView:render(x, y) -- override
 	if self:getlayoutmanager():getshowlayoutlines() then
@@ -50,7 +50,9 @@ function LOVELi.GraphicsView:render(x, y) -- override
 			self:getdesiredwidth(), 
 			self:getdesiredheight() )
 	end
-	self:drawable(x + self:getmargin():getleft(), y + self:getmargin():gettop(), self:getdesiredwidth(), self:getdesiredheight() )
+	if self.drawable then
+		self:drawable(x + self:getmargin():getleft(), y + self:getmargin():gettop(), self:getdesiredwidth(), self:getdesiredheight() )
+	end
 end
 function LOVELi.GraphicsView:type() -- override
 	return "GraphicsView"

@@ -72,7 +72,7 @@ end
 function LOVELi.Grid:measure(availablewidth, availableheight) -- override
 	--TODO: Handle invisible child
 	if availablewidth then
-		if not self:getisvisible() then
+		if availablewidth <= 0 or not self:getisvisible() then
 			self.desiredwidth = 0 
 			for _, control in ipairs(self:getcontrols() ) do
 				control:measure(0, nil)
@@ -163,7 +163,7 @@ function LOVELi.Grid:measure(availablewidth, availableheight) -- override
 		end
 	end
 	if availableheight then
-		if not self:getisvisible() then
+		if availableheight <= 0 or not self:getisvisible() then
 			self.desiredheight = 0 
 			for _, control in ipairs(self:getcontrols() ) do
 				control:measure(nil, 0)

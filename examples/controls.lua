@@ -85,6 +85,9 @@ end
 function love.mousepressed(x, y, button, istouch, presses)
 	layoutmanager:mousepressed(x, y, button, istouch, presses)
 end
+function love.mousemoved(x, y, dx, dy, istouch)
+  layoutmanager:mousemoved(x, y, dx, dy, istouch)
+end
 function love.joystickhat(joystick, hat, direction)
 	layoutmanager:joystickhat(joystick, hat, direction)
 end

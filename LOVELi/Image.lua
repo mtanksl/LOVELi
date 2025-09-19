@@ -50,7 +50,7 @@ function LOVELi.Image:measure(availablewidth, availableheight) -- override
 		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
 		local function getimagedimension() if dimension == "width" then return self:getimage():getWidth() else return self:getimage():getHeight() end end
 		if availabledimension then
-			if not self:getisvisible() then
+			if availabledimension <= 0 or not self:getisvisible() then
 				setdesireddimension(0)
 			elseif getdimension() == "*" then
 				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )

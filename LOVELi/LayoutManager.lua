@@ -33,8 +33,7 @@ function LOVELi.LayoutManager:new(options) -- LOVELi.LayoutManager LOVELi.Layout
 		eventhandlers = {},
 		focusedcontrol = 0,
 		initialized = false, -- private
-		recalculate = false, -- private
-		redraw = {}, -- private
+		invalid = true, -- private
 		alpha = 0, -- private
 		minimumalpha = 0.25, -- private
 		maximumalpha = 0.75, -- private
@@ -142,12 +141,10 @@ end
 function LOVELi.LayoutManager:getfocusedcontrol()
 	return self.focusedcontrol
 end
-function LOVELi.LayoutManager:invalidate(rootcontrol)
-	if not rootcontrol then
-		self.recalculate = true
-	end
-	for _, control in ipairs(self:getcontrols(rootcontrol) ) do
-		self.redraw[control] = true
+function LOVELi.LayoutManager:invalidate()
+	self.invalid = true
+	for _, control in ipairs(self:getcontrols() ) do
+		control:invalidate()
 	end
 end
 function LOVELi.LayoutManager:with(rootcontrol)
@@ -155,7 +152,6 @@ function LOVELi.LayoutManager:with(rootcontrol)
 		error("LayoutManager's root control is already set.")
 	end
 	self.rootcontrol = rootcontrol
-	self:invalidate()
 	return self
 end
 function LOVELi.LayoutManager:subscribe(name, control, callback)
@@ -179,16 +175,16 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 			direction = "d"
 		end		
 		if direction == "u" or direction == "d" then
-			local controls = self:getvisiblecontrols()
+			local controls = self:getcontrols()
 			local oldfocusedcontrol = self.focusedcontrol
 			local newfocusedcontrol	= 0
 			if direction == "u" then
-				local focusedcontrol = oldfocusedcontrol
-				if focusedcontrol == 0 then
-					focusedcontrol = 1
+				local k = oldfocusedcontrol
+				if k == 0 then
+					k = 1
 				end
 				for i = 1, #controls - 1 do
-					local j = focusedcontrol - i
+					local j = k - i
 					if j < 1 then
 						j = j + #controls
 					end
@@ -239,7 +235,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 			if self.focusedcontrol > 0 then
 				local events = self:geteventhandler("keypressed")
 				if events then
-					local controls = self:getvisiblecontrols()
+					local controls = self:getcontrols()
 					for _, event in ipairs(events) do
 						if event.control == controls[self.focusedcontrol] then
 							event.callback(key, scancode, isrepeat)
@@ -256,7 +252,7 @@ function LOVELi.LayoutManager:textinput(text)
 		if self.focusedcontrol > 0 then
 			local events = self:geteventhandler("textinput")
 			if events then
-				local controls = self:getvisiblecontrols()
+				local controls = self:getcontrols()
 				for _, event in ipairs(events) do
 					if event.control == controls[self.focusedcontrol] then
 						event.callback(text)
@@ -269,7 +265,7 @@ function LOVELi.LayoutManager:textinput(text)
 end
 function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 	if self:getisenabled() then
-		local controls = self:getvisiblecontrols()
+		local controls = self:getcontrols()
 		local oldfocusedcontrol = self.focusedcontrol
 		local newfocusedcontrol = 0
 		local events = self:geteventhandler("mousepressed")
@@ -281,11 +277,11 @@ function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 					if renderwidth > 0 and renderheight > 0 then
 						local renderx = event.control:getrenderx()
 						local rendery = event.control:getrendery()
-						if x > renderx and x < renderx + renderwidth and y > rendery and y < rendery + renderheight then
+						if x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight then
 							event.callback(x - renderx, y - rendery, button, istouch, presses)
 							if event.control:getisfocusable() then
 								for j = 1, #controls do
-									if controls[j] == event.control then
+									if event.control == controls[j] then
 										newfocusedcontrol = j
 										break
 									end
@@ -321,6 +317,46 @@ function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 				end
 			end
 			self.focusedcontrol = newfocusedcontrol
+		end
+	end
+end
+function LOVELi.LayoutManager:mousemoved(x, y, dx, dy, istouch)
+	if self:getisenabled() then
+		local events = self:geteventhandler("mouseleft")
+		if events then
+			for _, event in ipairs(events) do
+				if event.control:getisvisible() and event.control:getisenabled() then
+					local renderwidth = event.control:getrenderwidth()
+					local renderheight = event.control:getrenderheight()
+					if renderwidth > 0 and renderheight > 0 then
+						local renderx = event.control:getrenderx()
+						local rendery = event.control:getrendery()
+						if not (x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight) and
+							 (x - dx >= renderx and x - dx < renderx + renderwidth and y - dy >= rendery and y - dy < rendery + renderheight) then
+							event.callback(x - renderx, y - rendery, dx, dy, istouch)
+							break
+						end	
+					end
+				end
+			end
+		end
+		events = self:geteventhandler("mouseentered")
+		if events then
+			for _, event in ipairs(events) do
+				if event.control:getisvisible() and event.control:getisenabled() then
+					local renderwidth = event.control:getrenderwidth()
+					local renderheight = event.control:getrenderheight()
+					if renderwidth > 0 and renderheight > 0 then
+						local renderx = event.control:getrenderx()
+						local rendery = event.control:getrendery()
+						if (x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight) and 
+						   not (x - dx >= renderx and x - dx < renderx + renderwidth and y - dy >= rendery and y - dy < rendery + renderheight) then
+							event.callback(x - renderx, y - rendery, dx, dy, istouch)
+							break
+						end	
+					end
+				end
+			end
 		end
 	end
 end
@@ -368,8 +404,8 @@ end
 function LOVELi.LayoutManager:draw()
 	if self:getisvisible() then	
 		self:init()
-		if self.recalculate then
-			self.recalculate = false
+		if self.invalid then
+			self.invalid = false
 			local screenx = self:getx()
 			local screeny = self:gety()
 			local screenwidth = self:getwidth()
@@ -392,22 +428,20 @@ function LOVELi.LayoutManager:draw()
 				LOVELi.Math.clipheight(viewporty, viewportheight, screeny, screenheight)				
 			)
 		end
-		if next(self.redraw) then
-			for control, _ in pairs(self.redraw) do
-				control:draw()
-			end
-			self.redraw = {}
+		local controls = self:getvisiblecontrols()
+		for _, control in ipairs(controls) do
+			control:draw()
 		end
 		local mode, alphamode = love.graphics.getBlendMode()
 		love.graphics.setBlendMode("alpha", "premultiplied")
-		for j, control in ipairs(self:getvisiblecontrols() ) do
+		for j, control in ipairs(controls) do
 			local canvas = control:getcanvas()
 			if canvas then
 				if self.focusedcontrol == j then
 					love.graphics.setColor(self.alpha, self.alpha, self.alpha, self.alpha)
 				else
 					love.graphics.setColor(1, 1, 1, 1)
-				end					
+				end
 				love.graphics.draw(canvas, math.floor(control:getrenderx() ), math.floor(control:getrendery() ) ) -- Snap to grid
 			end
 		end

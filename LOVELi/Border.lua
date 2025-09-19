@@ -71,7 +71,7 @@ function LOVELi.Border:measure(availablewidth, availableheight) -- override
 		local function getcontroldimensionrequest(control) if dimension == "width" then return control:getdesiredwidth() else return control:getdesiredheight() end end
 		local function getcontrolmeasure(control, value) if dimension == "width" then control:measure(value, nil) else control:measure(nil, value) end return getcontroldimensionrequest(control) + getcontroldimensionmargin(control) end
 		if availabledimension then
-			if not self:getisvisible() then
+			if availabledimension <= 0 or not self:getisvisible() then
 				setdesireddimension(0)
 				local control = self:getcontrol()
 				if control then

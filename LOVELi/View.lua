@@ -28,9 +28,9 @@ function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y
 		y = LOVELi.Property.parse(options.y or 0),
 		width = LOVELi.Property.parse(options.width or "auto"),
 		height = LOVELi.Property.parse(options.height or "auto"),
-		minwidth = LOVELi.Property.parse(options.minwidth or -1),
+		minwidth = LOVELi.Property.parse(options.minwidth or 0),
 		maxwidth = LOVELi.Property.parse(options.maxwidth or math.huge),
-		minheight = LOVELi.Property.parse(options.minheight or -1),
+		minheight = LOVELi.Property.parse(options.minheight or 0),
 		maxheight = LOVELi.Property.parse(options.maxheight or math.huge),
 		margin = LOVELi.Property.parse(options.margin or LOVELi.Thickness.parse(0) ),
 		horizontaloptions = LOVELi.Property.parse(options.horizontaloptions or "start"),
@@ -49,7 +49,8 @@ function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y
 		viewporty = nil,
 		viewportwidth = nil,
 		viewportheight = nil,
-		canvas = nil
+		canvas = nil,
+		invalid = true -- private
 	}	
 	if options.isvisible == nil then
 		o.isvisible = LOVELi.Property.parse(true)
@@ -203,9 +204,7 @@ function LOVELi.View:getcanvas()
 	return self.canvas
 end
 function LOVELi.View:invalidate()
-	if self.layoutmanager then
-		self.layoutmanager:invalidate(self)
-	end
+	self.invalid = true
 end
 function LOVELi.View:getisfocusable() -- virtual
 	return false
@@ -224,7 +223,7 @@ function LOVELi.View:measure(availablewidth, availableheight) -- virtual
 		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
 		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
 		if availabledimension then
-			if not self:getisvisible() then
+			if availabledimension <= 0 or not self:getisvisible() then
 				setdesireddimension(0)
 			elseif getdimension() == "*" then
 				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
@@ -251,7 +250,8 @@ end
 function LOVELi.View:update(dt) -- virtual
 end
 function LOVELi.View:draw() 
-	if self:getisvisible() then
+	if self.invalid then
+		self.invalid = false
 		local width = self:getrenderwidth()
 		local height = self:getrenderheight()
 		if width > 0 and height > 0 then
@@ -267,8 +267,6 @@ function LOVELi.View:draw()
 		else
 			self.canvas = nil
 		end
-	else
-		self.canvas = nil
 	end
 end
 function LOVELi.View:render(x, y) -- virtual
