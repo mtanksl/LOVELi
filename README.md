@@ -2,7 +2,7 @@
 
 A [LÖVE 2D](https://love2d.org/) retained mode layout and GUI library.
 Includes StackLayout, AbsoluteLayout and Grid layouts.
-Includes Label, Button, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, Border and GraphicsView controls.
+Includes Label, Button, ImageButton, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, Border and GraphicsView controls.
 This library was inspired by .NET's MAUI controls.
 Tested on version 11.5.
 
@@ -145,6 +145,14 @@ loveli.Button:new{
     isvisible = true,
     isenabled = true
 }
+```
+
+### ImageButton
+
+ImageButton view combines the Button view and Image view to create a button whose content is an image. 
+
+```lua
+loveli.ImageButton:new{ source = "icon.png", aspect = "aspectfit", width = 64, height = 32, clicked = function(sender) end }
 ```
 
 ### Image

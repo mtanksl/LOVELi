@@ -52,29 +52,6 @@ end
 function LOVELi.AnimatedLabel:setelapsed(value)
 	self.elapsed:setvalue(value)
 end
-function LOVELi.AnimatedLabel:measure(availablewidth, availableheight) -- override
-	local function measure(dimension, availabledimension)
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		local function getfontdimension() if dimension == "width" then return self:getfont():getWidth(self:gettext() ) else return self:getfont():getHeight() end end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-			elseif getdimension() == "*" then
-				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-			elseif getdimension() == "auto" then
-				setdesireddimension(getfontdimension() )
-			else
-				setdesireddimension(getdimension() )
-			end
-		end
-	end
-	measure("width", availablewidth)
-	measure("height", availableheight)
-end
 function LOVELi.AnimatedLabel:update(dt) -- override
 	if self:getisplaying() and self:getelapsed() < self:getduration() then
 		self:setelapsed(math.min(self:getduration(), self:getelapsed() + dt) )

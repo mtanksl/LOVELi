@@ -34,6 +34,7 @@ local classes = {
 	"GraphicsView",
 	"Label",
 	"Button",
+	"ImageButton",
 	"Image",
 	"CheckBox",
 	"RadioButton",
