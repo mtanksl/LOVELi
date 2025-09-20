@@ -22,9 +22,9 @@
 
 LOVELi.Grid = {}
 LOVELi.Grid.__index = LOVELi.Grid
-setmetatable(LOVELi.Grid, LOVELi.Layout)
+setmetatable(LOVELi.Grid, LOVELi.View)
 function LOVELi.Grid:new(options) -- LOVELi.Grid LOVELi.Grid:new( { Union<"1*", "auto", int>[] rowdefinitions, Union<"1*", "auto", int>[] columndefinitions, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
-	local o = LOVELi.Layout.new(self, options)
+	local o = LOVELi.View.new(self, options)
 	o.rows = {}	
 	for _, rowdefinition in ipairs(options.rowdefinitions) do
 		o:addrow(rowdefinition)
@@ -33,7 +33,7 @@ function LOVELi.Grid:new(options) -- LOVELi.Grid LOVELi.Grid:new( { Union<"1*", 
 	for _, columndefinition in ipairs(options.columndefinitions) do
 		o:addcolumn(columndefinition)
 	end
-	o.internalcontrols = {}
+	o.grid = {}
 	return o
 end
 function LOVELi.Grid:getrows()
@@ -43,8 +43,8 @@ function LOVELi.Grid:getcolumns()
 	return self.columns
 end
 function LOVELi.Grid:getcontrol(row, column)
-	if self.internalcontrols[row] then
-		return self.internalcontrols[row][column]
+	if self.grid[row] then
+		return self.grid[row][column]
 	end
 	return nil
 end
@@ -54,13 +54,13 @@ function LOVELi.Grid:with(row, column, control)
 	end
 	control.parent = self
 	table.insert(self.controls, control)
-	if not self.internalcontrols[row] then
-		self.internalcontrols[row] = {}
+	if not self.grid[row] then
+		self.grid[row] = {}
 	end
-	if not self.internalcontrols[row][column] then
-		self.internalcontrols[row][column] = {}
+	if not self.grid[row][column] then
+		self.grid[row][column] = {}
 	end
-	table.insert(self.internalcontrols[row][column], control)
+	table.insert(self.grid[row][column], control)
 	return self
 end
 function LOVELi.Grid:addrow(height)

@@ -160,6 +160,16 @@ function LOVELi.LayoutManager:subscribe(name, control, callback)
 	end
 	table.insert(self.eventhandlers[name], { control = control, callback = callback } )
 end
+function LOVELi.LayoutManager:unsubscribe(name, control)
+	if self.eventhandlers[name] then
+		for i, event in ipairs(self.eventhandlers[name] ) do
+			if event.control == control then
+				table.remove(self.eventhandlers[name], i)
+				break
+			end
+		end
+	end
+end
 function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 	if self:getisenabled() then
 		local direction = nil
@@ -354,6 +364,22 @@ function LOVELi.LayoutManager:mousemoved(x, y, dx, dy, istouch)
 							event.callback(x - renderx, y - rendery, dx, dy, istouch)
 							break
 						end	
+					end
+				end
+			end
+		end
+	end
+end
+function LOVELi.LayoutManager:wheelmoved(dx, dy)
+	if self:getisenabled() then
+		if self.focusedcontrol > 0 then
+			local events = self:geteventhandler("wheelmoved")
+			if events then
+				local controls = self:getcontrols()
+				for _, event in ipairs(events) do
+					if event.control == controls[self.focusedcontrol] then
+						event.callback(dx, dy)
+						break
 					end
 				end
 			end

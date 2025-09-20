@@ -30,7 +30,7 @@ local classes = {
 	"RowDefinition",
 	"ColumnDefinition",
 	-- View
-	"View",
+	"View",	
 	"GraphicsView",
 	"Label",
 	"Button",
@@ -44,7 +44,7 @@ local classes = {
 	"TextBox",
 	"Border",
 	-- Layout
-	"Layout",
+	"ContentView",
 	"AbsoluteLayout",
 	"StackLayout",
 	"Grid",

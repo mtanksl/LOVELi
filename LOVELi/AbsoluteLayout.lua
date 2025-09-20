@@ -22,9 +22,9 @@
 
 LOVELi.AbsoluteLayout = {}
 LOVELi.AbsoluteLayout.__index = LOVELi.AbsoluteLayout
-setmetatable(LOVELi.AbsoluteLayout, LOVELi.Layout)
+setmetatable(LOVELi.AbsoluteLayout, LOVELi.View)
 function LOVELi.AbsoluteLayout:new(options) -- LOVELi.AbsoluteLayout LOVELi.AbsoluteLayout:new( { int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
-	local o = LOVELi.Layout.new(self, options)
+	local o = LOVELi.View.new(self, options)
 	return o
 end
 function LOVELi.AbsoluteLayout:with(control)

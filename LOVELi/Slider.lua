@@ -117,6 +117,21 @@ function LOVELi.Slider:init(layoutmanager) -- override
 			onvaluechange(oldvalue, newvalue)
 		end
 	end)
+	layoutmanager:subscribe("wheelmoved", self, function(dx, dy)
+		if dy > 0 then
+			local oldvalue = self:getvalue()
+			local newvalue = oldvalue - 1
+			if newvalue >= self:getminimum() then
+				onvaluechange(oldvalue, newvalue)
+			end
+		elseif dy < 0 then
+			local oldvalue = self:getvalue()
+			local newvalue = oldvalue + 1
+			if newvalue <= self:getmaximum() then
+				onvaluechange(oldvalue, newvalue)
+			end
+		end
+	end)
 end
 function LOVELi.Slider:measure(availablewidth, availableheight) -- override
 	local function measure(dimension, availabledimension, auto)

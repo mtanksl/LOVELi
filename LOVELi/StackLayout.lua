@@ -22,9 +22,9 @@
 
 LOVELi.StackLayout = {}
 LOVELi.StackLayout.__index = LOVELi.StackLayout
-setmetatable(LOVELi.StackLayout, LOVELi.Layout)
+setmetatable(LOVELi.StackLayout, LOVELi.View)
 function LOVELi.StackLayout:new(options) -- LOVELi.StackLayout LOVELi.StackLayout:new( { Union<"vertical", "horizontal"> orientation, int spacing, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
-	local o = LOVELi.Layout.new(self, options)
+	local o = LOVELi.View.new(self, options)
 	o.orientation = options.orientation or "vertical"
 	o.spacing = options.spacing or 0
 	return o

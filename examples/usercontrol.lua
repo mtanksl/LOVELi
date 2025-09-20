@@ -31,6 +31,8 @@ function card(width, height, title, text)
 				:with(loveli.Label:new{ text = text, ismultiline = true, horizontaltextalignment = "start", verticaltextalignment = "start", width = "*", height = "*" } )
 			)
 		)
+	-- Note: instead of a function, you can also create a custom control that inherits from ContentView and set its content using :with().
+	-- It all boils down to your project's organizational preferences.
 end
 function love.load(arg)
 	enabledebugger(arg)	
@@ -52,6 +54,9 @@ function love.mousepressed(x, y, button, istouch, presses)
 end
 function love.mousemoved(x, y, dx, dy, istouch)
   layoutmanager:mousemoved(x, y, dx, dy, istouch)
+end
+function love.wheelmoved(dx, dy)
+  layoutmanager:wheelmoved(dx, dy)
 end
 function love.joystickhat(joystick, hat, direction)
 	layoutmanager:joystickhat(joystick, hat, direction)
