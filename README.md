@@ -237,8 +237,8 @@ ScrollView is a view that's capable of scrolling its content.
 
 ```lua
 local scrollview = loveli.ScrollView:new{ scrolled = function(sender, dx, dy) end, orientation = "both", verticalscrollbarvisibility = "default", verticalscrollbarwidth = 5, verticalscrollbarincrement = 100, width = "*", height = "*" }
+  :with(stacklayout)
 ```
-
 
 # Keyboard Accessibility
 
