@@ -32,7 +32,6 @@ function card(width, height, title, text)
 			)
 		)
 	-- Note: instead of a function, you can also create a custom control that inherits from ContentView and set its content using :with().
-	-- It all boils down to your project's organizational preferences.
 end
 function love.load(arg)
 	enabledebugger(arg)	

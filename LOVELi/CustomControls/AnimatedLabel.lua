@@ -23,7 +23,7 @@
 LOVELi.AnimatedLabel = {}
 LOVELi.AnimatedLabel.__index = LOVELi.AnimatedLabel
 setmetatable(LOVELi.AnimatedLabel, LOVELi.Label)
-function LOVELi.AnimatedLabel:new(options) -- LOVELi.AnimatedLabel LOVELi.AnimatedLabel:new( { bool isplaying, double duration, double elapsed, total string text, bool ismultiline, Font font, Union<"start", "center", "end"> horizontaltextalignment, Union<"start", "center", "end"> verticaltextalignment, LOVELi.Color textcolor, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.AnimatedLabel:new(options) -- LOVELi.AnimatedLabel LOVELi.AnimatedLabel:new( { bool isplaying, double duration, double elapsed, string text, bool ismultiline, Font font, Union<"start", "center", "end"> horizontaltextalignment, Union<"start", "center", "end"> verticaltextalignment, LOVELi.Color textcolor, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.Label.new(self, options)
 	if options.isplaying == nil then
 		o.isplaying = LOVELi.Property.parse(false)

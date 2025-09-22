@@ -44,6 +44,8 @@ function LOVELi.ContentView:with(control)
 	return self
 end
 function LOVELi.ContentView:measure(availablewidth, availableheight) -- override
+	self.availablewidth = availablewidth or self.availablewidth
+	self.availableheight = availableheight or self.availableheight
 	local function measure(dimension, availabledimension)	
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
 		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
@@ -74,7 +76,7 @@ function LOVELi.ContentView:measure(availablewidth, availableheight) -- override
 				local control = self:getcontrol()
 				if control then
 					if getcontroldimension(control) == "*" and getdimension() == "auto" then
-						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " Border.")
+						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " ContentView.")
 					end
 					local controldimension = getcontrolmeasure(control, getdesireddimension() )
 					if controldimension > 0 then
@@ -103,67 +105,35 @@ function LOVELi.ContentView:arrange(screenx, screeny, screenwidth, screenheight,
 	self.viewportwidth = viewportwidth
 	self.viewportheight = viewportheight	
 	local control = self:getcontrol()
-	local horizontalalignment = 0	
-	if control:gethorizontaloptions() == "start" then
-		horizontalalignment = 0
-	elseif control:gethorizontaloptions() == "center" then
-		horizontalalignment = self:getdesiredwidth() / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
-	elseif control:gethorizontaloptions() == "end" then
-		horizontalalignment = self:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
-	end
-	local verticalalignment = 0		
-	if control:getverticaloptions() == "start" then
-		verticalalignment = 0
-	elseif control:getverticaloptions() == "center" then
-		verticalalignment = self:getdesiredheight() / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
-	elseif control:getverticaloptions() == "end" then
-		verticalalignment = self:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) 
-	end
-	control:arrange(
-		screenx + self:getmargin():getleft() + control:getx() + horizontalalignment,
-		screeny + self:getmargin():gettop() + control:gety() + verticalalignment, 
-		control:getdesiredwidth() + control:getmargin():gethorizontal(), 
-		control:getdesiredheight() + control:getmargin():getvertical(),
-		
-		LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() ),
-		LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() ),
-		LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft(), self:getdesiredwidth() ),
-		LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop(), self:getdesiredheight() ) 
-	)
-end
-function LOVELi.ContentView:render(x, y) -- override
-	if self:getlayoutmanager():getshowlayoutlines() then
-		if self:getmargin():gethorizontal() > 0 or self:getmargin():getvertical() > 0 then
-			love.graphics.setColor(1, 1, 0)
-			love.graphics.rectangle(
-				"line", 
-				x, 
-				y, 
-				self:getdesiredwidth() + self:getmargin():gethorizontal(),  
-				self:getdesiredheight() + self:getmargin():getvertical() )
+	if control then
+		local horizontalalignment = 0	
+		if control:gethorizontaloptions() == "start" then
+			horizontalalignment = 0
+		elseif control:gethorizontaloptions() == "center" then
+			horizontalalignment = self:getdesiredwidth() / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
+		elseif control:gethorizontaloptions() == "end" then
+			horizontalalignment = self:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
 		end
-		love.graphics.setColor(1, 1, 1)
-		love.graphics.rectangle(
-			"line", 
-			x + self:getmargin():getleft(), 
-			y + self:getmargin():gettop(), 
-			self:getdesiredwidth(), 
-			self:getdesiredheight() )
+		local verticalalignment = 0		
+		if control:getverticaloptions() == "start" then
+			verticalalignment = 0
+		elseif control:getverticaloptions() == "center" then
+			verticalalignment = self:getdesiredheight() / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
+		elseif control:getverticaloptions() == "end" then
+			verticalalignment = self:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) 
+		end
+		control:arrange(
+			screenx + self:getmargin():getleft() + control:getx() + horizontalalignment,
+			screeny + self:getmargin():gettop() + control:gety() + verticalalignment, 
+			control:getdesiredwidth() + control:getmargin():gethorizontal(), 
+			control:getdesiredheight() + control:getmargin():getvertical(),
+			
+			LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() ),
+			LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() ),
+			LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft(), self:getdesiredwidth() ),
+			LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop(), self:getdesiredheight() ) 
+		)
 	end
-	love.graphics.setColor(self:getbackgroundcolor():getred(), self:getbackgroundcolor():getgreen(), self:getbackgroundcolor():getblue(), self:getbackgroundcolor():getalpha() )	
-	love.graphics.rectangle(
-		"fill", 
-		x + self:getmargin():getleft(), 
-		y + self:getmargin():gettop(), 
-		self:getdesiredwidth(), 
-		self:getdesiredheight() )
-	love.graphics.setColor(self:getbordercolor():getred(), self:getbordercolor():getgreen(), self:getbordercolor():getblue(), self:getbordercolor():getalpha() )
-	love.graphics.rectangle(
-		"line",
-		x + self:getmargin():getleft() + 0.5, 
-		y + self:getmargin():gettop() + 0.5,
-		self:getdesiredwidth() - 1,
-		self:getdesiredheight() - 1)
 end
 function LOVELi.ContentView:type() -- override
 	return "ContentView"

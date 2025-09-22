@@ -65,6 +65,8 @@ function LOVELi.Border:with(control)
 	return self
 end
 function LOVELi.Border:measure(availablewidth, availableheight) -- override
+	self.availablewidth = availablewidth or self.availablewidth
+	self.availableheight = availableheight or self.availableheight
 	local function measure(dimension, availabledimension)	
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
 		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
@@ -125,33 +127,35 @@ function LOVELi.Border:arrange(screenx, screeny, screenwidth, screenheight, view
 	self.viewportwidth = viewportwidth
 	self.viewportheight = viewportheight	
 	local control = self:getcontrol()
-	local horizontalalignment = 0	
-	if control:gethorizontaloptions() == "start" then
-		horizontalalignment = 0
-	elseif control:gethorizontaloptions() == "center" then
-		horizontalalignment = (self:getdesiredwidth() - self:getpadding():gethorizontal() ) / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
-	elseif control:gethorizontaloptions() == "end" then
-		horizontalalignment = (self:getdesiredwidth() - self:getpadding():gethorizontal() ) - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
+	if control then
+		local horizontalalignment = 0	
+		if control:gethorizontaloptions() == "start" then
+			horizontalalignment = 0
+		elseif control:gethorizontaloptions() == "center" then
+			horizontalalignment = (self:getdesiredwidth() - self:getpadding():gethorizontal() ) / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
+		elseif control:gethorizontaloptions() == "end" then
+			horizontalalignment = (self:getdesiredwidth() - self:getpadding():gethorizontal() ) - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
+		end
+		local verticalalignment = 0		
+		if control:getverticaloptions() == "start" then
+			verticalalignment = 0
+		elseif control:getverticaloptions() == "center" then
+			verticalalignment = (self:getdesiredheight() - self:getpadding():getvertical() ) / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
+		elseif control:getverticaloptions() == "end" then
+			verticalalignment = (self:getdesiredheight() - self:getpadding():getvertical() ) - (control:getdesiredheight() + control:getmargin():getvertical() ) 
+		end
+		control:arrange(
+			screenx + self:getmargin():getleft() + self:getpadding():getleft() + control:getx() + horizontalalignment,
+			screeny + self:getmargin():gettop() + self:getpadding():gettop() + control:gety() + verticalalignment, 
+			control:getdesiredwidth() + control:getmargin():gethorizontal(), 
+			control:getdesiredheight() + control:getmargin():getvertical(),
+			
+			LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() + self:getpadding():getleft() ),
+			LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() + self:getpadding():gettop() ),
+			LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft() + self:getpadding():getleft(), self:getdesiredwidth() - self:getpadding():gethorizontal() ),
+			LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop() + self:getpadding():gettop(), self:getdesiredheight() - self:getpadding():getvertical() ) 
+		)
 	end
-	local verticalalignment = 0		
-	if control:getverticaloptions() == "start" then
-		verticalalignment = 0
-	elseif control:getverticaloptions() == "center" then
-		verticalalignment = (self:getdesiredheight() - self:getpadding():getvertical() ) / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
-	elseif control:getverticaloptions() == "end" then
-		verticalalignment = (self:getdesiredheight() - self:getpadding():getvertical() ) - (control:getdesiredheight() + control:getmargin():getvertical() ) 
-	end
-	control:arrange(
-		screenx + self:getmargin():getleft() + self:getpadding():getleft() + control:getx() + horizontalalignment,
-		screeny + self:getmargin():gettop() + self:getpadding():gettop() + control:gety() + verticalalignment, 
-		control:getdesiredwidth() + control:getmargin():gethorizontal(), 
-		control:getdesiredheight() + control:getmargin():getvertical(),
-		
-		LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() + self:getpadding():getleft() ),
-		LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() + self:getpadding():gettop() ),
-		LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft() + self:getpadding():getleft(), self:getdesiredwidth() - self:getpadding():gethorizontal() ),
-		LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop() + self:getpadding():gettop(), self:getdesiredheight() - self:getpadding():getvertical() ) 
-	)
 end
 function LOVELi.Border:render(x, y) -- override
 	if self:getlayoutmanager():getshowlayoutlines() then

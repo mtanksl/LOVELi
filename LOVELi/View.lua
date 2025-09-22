@@ -39,6 +39,8 @@ function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y
 		parent = nil,
 		controls = {},
 		layoutmanager = nil,
+		availablewidth = nil,
+		availableheight = nil,		
 		desiredwidth = nil,
 		desiredheight = nil,
 		screenx = nil,
@@ -158,6 +160,12 @@ end
 function LOVELi.View:getlayoutmanager()
 	return self.layoutmanager
 end
+function LOVELi.View:getavailablewidth()
+	return self.availablewidth
+end
+function LOVELi.View:getavailableheight()
+	return self.availableheight
+end
 function LOVELi.View:getdesiredwidth()
 	return self.desiredwidth
 end
@@ -203,8 +211,19 @@ end
 function LOVELi.View:getcanvas()
 	return self.canvas
 end
+function LOVELi.View:invalidatemeasure()
+	--TODO: Do not use, this function may be changed
+	self:measure(self.availablewidth, self.availableheight)
+end
+function LOVELi.View:invalidatearrange()
+	--TODO: Do not use, this function may be changed
+	self:arrange(self.screenx, self.screeny, self.screenwidth, self.screenheight, self.viewportx, self.viewporty, self.viewportwidth, self.viewportheight)
+end
 function LOVELi.View:invalidate()
 	self.invalid = true
+	for _, control in ipairs(self:getcontrols() ) do
+		control:invalidate()
+	end
 end
 function LOVELi.View:getisfocusable() -- virtual
 	return false
@@ -216,6 +235,8 @@ function LOVELi.View:init(layoutmanager) -- virtual
 	self.layoutmanager = layoutmanager
 end
 function LOVELi.View:measure(availablewidth, availableheight) -- virtual
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
 	local function measure(dimension, availabledimension)
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
 		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end

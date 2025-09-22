@@ -74,6 +74,8 @@ function LOVELi.Label:settextcolor(value)
 	self.textcolor:setvalue(value)
 end
 function LOVELi.Label:measure(availablewidth, availableheight) -- override
+	self.availablewidth = availablewidth or self.availablewidth
+	self.availableheight = availableheight or self.availableheight
 	local function measure(dimension, availabledimension)
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
 		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end

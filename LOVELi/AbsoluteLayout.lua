@@ -36,6 +36,8 @@ function LOVELi.AbsoluteLayout:with(control)
 	return self
 end
 function LOVELi.AbsoluteLayout:measure(availablewidth, availableheight) -- override
+	self.availablewidth = availablewidth or self.availablewidth
+	self.availableheight = availableheight or self.availableheight
 	local function measure(dimension, availabledimension)
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
 		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
@@ -121,26 +123,6 @@ function LOVELi.AbsoluteLayout:arrange(screenx, screeny, screenwidth, screenheig
 			LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft(), self:getdesiredwidth() ),
 			LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop(), self:getdesiredheight() )
 		)
-	end
-end
-function LOVELi.AbsoluteLayout:render(x, y) -- override
-	if self:getlayoutmanager():getshowlayoutlines() then
-		if self:getmargin():gethorizontal() > 0 or self:getmargin():getvertical() > 0 then
-			love.graphics.setColor(1, 1, 0)
-			love.graphics.rectangle(
-				"line", 
-				x, 
-				y, 
-				self:getdesiredwidth() + self:getmargin():gethorizontal(),  
-				self:getdesiredheight() + self:getmargin():getvertical() )
-		end
-		love.graphics.setColor(1, 1, 1)
-		love.graphics.rectangle(
-			"line", 
-			x + self:getmargin():getleft(), 
-			y + self:getmargin():gettop(), 
-			self:getdesiredwidth(), 
-			self:getdesiredheight() )
 	end
 end
 function LOVELi.AbsoluteLayout:type() -- override

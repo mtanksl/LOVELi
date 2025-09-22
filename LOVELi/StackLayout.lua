@@ -25,15 +25,21 @@ LOVELi.StackLayout.__index = LOVELi.StackLayout
 setmetatable(LOVELi.StackLayout, LOVELi.View)
 function LOVELi.StackLayout:new(options) -- LOVELi.StackLayout LOVELi.StackLayout:new( { Union<"vertical", "horizontal"> orientation, int spacing, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
-	o.orientation = options.orientation or "vertical"
-	o.spacing = options.spacing or 0
+	o.orientation = LOVELi.Property.parse(options.orientation or "vertical")
+	o.spacing = LOVELi.Property.parse(options.spacing or 0)
 	return o
 end
 function LOVELi.StackLayout:getorientation()
-	return self.orientation
+	return self.orientation:getvalue()
+end
+function LOVELi.StackLayout:setorientation(value)
+	self.orientation:setvalue(value)
 end
 function LOVELi.StackLayout:getspacing()
-	return self.spacing
+	return self.spacing:getvalue()
+end
+function LOVELi.StackLayout:setspacing(value)
+	self.spacing:setvalue(value)
 end
 function LOVELi.StackLayout:with(control)
 	if control.parent then
@@ -44,6 +50,8 @@ function LOVELi.StackLayout:with(control)
 	return self
 end
 function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
+	self.availablewidth = availablewidth or self.availablewidth
+	self.availableheight = availableheight or self.availableheight
 	local function measure(dimension, availabledimension)	
 		--TODO: Handle invisible child
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
@@ -172,26 +180,6 @@ function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight,
 			offsety = offsety + control:getdesiredheight() + control:getmargin():getvertical() + self:getspacing()
 		end
 	end	
-end
-function LOVELi.StackLayout:render(x, y) -- override
-	if self:getlayoutmanager():getshowlayoutlines() then
-		if self:getmargin():gethorizontal() > 0 or self:getmargin():getvertical() > 0 then
-			love.graphics.setColor(1, 1, 0)
-			love.graphics.rectangle(
-				"line", 
-				x, 
-				y, 
-				self:getdesiredwidth() + self:getmargin():gethorizontal(),  
-				self:getdesiredheight() + self:getmargin():getvertical() )
-		end
-		love.graphics.setColor(1, 1, 1)
-		love.graphics.rectangle(
-			"line", 
-			x + self:getmargin():getleft(), 
-			y + self:getmargin():gettop(), 
-			self:getdesiredwidth(), 
-			self:getdesiredheight() )
-	end
 end
 function LOVELi.StackLayout:type() -- override
 	return "StackLayout"

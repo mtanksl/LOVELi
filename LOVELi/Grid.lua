@@ -23,7 +23,7 @@
 LOVELi.Grid = {}
 LOVELi.Grid.__index = LOVELi.Grid
 setmetatable(LOVELi.Grid, LOVELi.View)
-function LOVELi.Grid:new(options) -- LOVELi.Grid LOVELi.Grid:new( { Union<"1*", "auto", int>[] rowdefinitions, Union<"1*", "auto", int>[] columndefinitions, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.Grid:new(options) -- LOVELi.Grid LOVELi.Grid:new( { Union<"1*", "2*", ... "auto", int>[] rowdefinitions, Union<"1*", "2*", ..., "auto", int>[] columndefinitions, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
 	o.rows = {}	
 	for _, rowdefinition in ipairs(options.rowdefinitions) do
@@ -70,6 +70,8 @@ function LOVELi.Grid:addcolumn(width)
 	table.insert(self.columns,  LOVELi.ColumnDefinition:new(width) )
 end
 function LOVELi.Grid:measure(availablewidth, availableheight) -- override
+	self.availablewidth = availablewidth or self.availablewidth
+	self.availableheight = availableheight or self.availableheight
 	--TODO: Handle invisible child
 	if availablewidth then
 		if availablewidth <= 0 or not self:getisvisible() then
@@ -198,7 +200,7 @@ function LOVELi.Grid:measure(availablewidth, availableheight) -- override
 						local controls = self:getcontrol(j, i)
 						if controls then
 							for _, control in ipairs(controls) do
-								if control.height == "*" then
+								if control:getheight() == "*" then
 									table.insert(skipped, control)
 								else
 									control:measure(nil, math.huge)

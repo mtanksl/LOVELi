@@ -45,6 +45,7 @@ local classes = {
 	"Border",
 	-- Layout
 	"ContentView",
+	"ScrollView",
 	"AbsoluteLayout",
 	"StackLayout",
 	"Grid",

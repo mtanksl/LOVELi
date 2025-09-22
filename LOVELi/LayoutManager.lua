@@ -143,9 +143,7 @@ function LOVELi.LayoutManager:getfocusedcontrol()
 end
 function LOVELi.LayoutManager:invalidate()
 	self.invalid = true
-	for _, control in ipairs(self:getcontrols() ) do
-		control:invalidate()
-	end
+	self.rootcontrol:invalidate()
 end
 function LOVELi.LayoutManager:with(rootcontrol)
 	if self.rootcontrol then
@@ -193,7 +191,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 				if k == 0 then
 					k = 1
 				end
-				for i = 1, #controls - 1 do
+				for i = 1, #controls do
 					local j = k - i
 					if j < 1 then
 						j = j + #controls
@@ -205,7 +203,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 				end
 			else
 				local focusedcontrol = oldfocusedcontrol
-				for i = 1, #controls - 1 do
+				for i = 1, #controls do
 					local j = focusedcontrol + i
 					if j > #controls then
 						j = j - #controls
@@ -371,15 +369,25 @@ function LOVELi.LayoutManager:mousemoved(x, y, dx, dy, istouch)
 	end
 end
 function LOVELi.LayoutManager:wheelmoved(dx, dy)
-	if self:getisenabled() then
-		if self.focusedcontrol > 0 then
-			local events = self:geteventhandler("wheelmoved")
-			if events then
-				local controls = self:getcontrols()
-				for _, event in ipairs(events) do
-					if event.control == controls[self.focusedcontrol] then
-						event.callback(dx, dy)
-						break
+	if self:getisenabled() then		
+		local events = self:geteventhandler("wheelmoved")
+		if events then
+			local x, y = love.mouse.getPosition()
+			for _, event in ipairs(events) do
+				if event.control:getisvisible() and event.control:getisenabled() then
+					local renderwidth = event.control:getrenderwidth()
+					local renderheight = event.control:getrenderheight()
+					if renderwidth > 0 and renderheight > 0 then
+						local renderx = event.control:getrenderx()
+						local rendery = event.control:getrendery()
+						if x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight then
+							if love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift") then						
+								event.callback(x - renderx, y - rendery, dy, dx)
+							else
+								event.callback(x - renderx, y - rendery, dx, dy)
+							end							
+							break
+						end	
 					end
 				end
 			end
