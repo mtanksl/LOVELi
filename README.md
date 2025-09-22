@@ -2,7 +2,7 @@
 
 A [LÖVE 2D](https://love2d.org/) retained mode layout and GUI library.
 Includes StackLayout, AbsoluteLayout and Grid layouts.
-Includes Label, Button, ImageButton, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, Border and GraphicsView controls.
+Includes Label, Button, ImageButton, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, Border, GraphicsView and ScrollView controls.
 This library was inspired by .NET's MAUI controls.
 Tested on version 11.5.
 
@@ -230,6 +230,15 @@ GraphicsView is a graphics canvas on which 2D graphics can be drawn.
 ```lua
 local graphicsview = loveli.GraphicsView:new{ drawable = function(sender, x, y, width, height) end, width = "*", height = "*" }
 ```
+
+### ScrollView
+
+ScrollView is a view that's capable of scrolling its content.
+
+```lua
+local scrollview = loveli.ScrollView:new{ scrolled = function(sender, dx, dy) end, orientation = "both", verticalscrollbarvisibility = "default", verticalscrollbarwidth = 5, verticalscrollbarincrement = 100, width = "*", height = "*" }
+```
+
 
 # Keyboard Accessibility
 
