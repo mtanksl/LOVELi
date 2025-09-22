@@ -26,6 +26,9 @@ dofile("examples/controls.lua")
 -- Uncomment to see Menu example:
 --dofile("examples/menu.lua")
 
+-- Uncomment to see HUD example:
+--dofile("examples/hud.lua")
+
 -- Uncomment to see User Control (aka composite control) example:
 --dofile("examples/usercontrol.lua")
 

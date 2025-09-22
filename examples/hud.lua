@@ -23,25 +23,31 @@
 local loveli = require("LOVELi")
 function love.load(arg)
 	enabledebugger(arg)	
-	local font = loveli.Property.parse(love.graphics.getFont() )
-	local textcolor = loveli.Property.parse(loveli.Color.parse(0xFFFFFFFF) )
-	local backgroundcolor = loveli.Property.parse(loveli.Color.parse(0xDF4794FF) )
-	label = loveli.Label:new{ text = "FPS: 0", font = font, textcolor = textcolor, x = 0, y = 0, width = 75, height = "auto" } 
+	local font = loveli.Property.parse(love.graphics.newFont(18) )
+	local whitecolor = loveli.Property.parse(loveli.Color.parse(0xFFFFFFFF) )
+	local greencolor = loveli.Property.parse(loveli.Color.parse(0x00FF00FF) )
+	local darkgreencolor = loveli.Property.parse(loveli.Color.parse(0x008000FF) )
+	local mustardcolor = loveli.Property.parse(loveli.Color.parse(0xFFCE18FF) )
+	label = loveli.Label:new{ text = "FPS: 0", textcolor = whitecolor, width = 75, height = "auto", } 
 	layoutmanager = loveli.LayoutManager:new{}
 		:with(loveli.AbsoluteLayout:new{ width = "*", height = "*", margin = loveli.Thickness.parse(10) }
-			:with(label)
-			:with(loveli.Label:new{ text = "Press ESC to show layout lines", font = font, textcolor = loveli.Color.parse(0x00FF00FF), x = 0, y = 0, width = "auto", height = "auto", horizontaloptions = "center", verticaloptions = "end" } )
-			:with(loveli.Grid:new{ rowdefinitions = { "1*" }, columndefinitions = { "1*" }, x = 0, y = 0, width = "*", height = "*" }
-				:with(1, 1, loveli.StackLayout:new{ orientation = "vertical", spacing = 10, width = "auto", height = "auto", horizontaloptions = "center", verticaloptions = "center" }
-					:with(loveli.Label:new{ text = "LOVELi (LOVE Layout and GUI)", font = font, textcolor = textcolor, horizontaloptions = "center" } )
-					:with(loveli.Image:new{ source = "icon.png", aspect = "aspectfit", width = 100, height = 128, horizontaloptions = "center" } )				
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "New Game", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 75, height = 23, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Continue", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 75, height = 23, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Options", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 75, height = 23, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Credits", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 75, height = 23, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Exit", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 75, height = 23, horizontaloptions = "center" } )
-				)
+			:with(loveli.StackLayout:new{ orientation = "vertical", spacing = 10, x = 0, y = 0, width = "auto", height = "auto", horizontaloptions = "start", verticaloptions = "start" }
+				:with(label)
+				:with(loveli.GraphicsView:new{ drawable = function(sender, x, y, width, height) 
+					love.graphics.setColor(darkgreencolor:getvalue():getrgba() ) 
+					love.graphics.circle("fill", width / 2, height / 2, width / 2, height / 2) 
+				end, width = 80, height = 80 } )
 			)
+			:with(loveli.StackLayout:new{ orientation = "horizontal", spacing = 10, x = 0, y = 0, width = "auto", height = "auto", horizontaloptions = "start", verticaloptions = "end" }
+				:with(loveli.Label:new{ text = "100", font = font, textcolor = mustardcolor, width = 75, height = "auto" } )
+				:with(loveli.Label:new{ text = "0", font = font, textcolor = mustardcolor, width = 75, height = "auto" } )
+			)
+			:with(loveli.Label:new{ text = "1:45", font = font, textcolor = mustardcolor, x = 0, y = 0, width = 75, height = "auto", horizontaloptions = "center", verticaloptions = "end" } )
+			:with(loveli.StackLayout:new{ orientation = "vertical", spacing = 10, x = 0, y = 0, width = "auto", height = "auto", horizontaloptions = "end", verticaloptions = "end" }
+				:with(loveli.Label:new{ text = "$ 800", font = font, textcolor = mustardcolor, width = 75, height = "auto" } )
+				:with(loveli.Label:new{ text = "12 / 100", font = font, textcolor = mustardcolor, width = 75, height = "auto" } )
+			)
+			:with(loveli.Label:new{ text = "Press ESC to show layout lines", textcolor = greencolor, x = 0, y = 0, width = "auto", height = "auto", horizontaloptions = "center", verticaloptions = "center" } )
 		)
 end
 function love.keypressed(key, scancode, isrepeat)

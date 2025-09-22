@@ -44,6 +44,9 @@ end
 function LOVELi.Color:getalpha()
 	return self.alpha
 end
+function LOVELi.Color:getrgba()
+	return self.red, self.green, self.blue, self.alpha
+end	
 function LOVELi.Color:type()
 	return "Color"
 end

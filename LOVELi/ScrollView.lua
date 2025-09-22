@@ -23,7 +23,7 @@
 LOVELi.ScrollView = {}
 LOVELi.ScrollView.__index = LOVELi.ScrollView
 setmetatable(LOVELi.ScrollView, LOVELi.View)
-function LOVELi.ScrollView:new(options) -- LOVELi.ScrollView LOVELi.ScrollView:new( { Action<LOVELi.ScrollView sender, int dx, int dy> scrolled, Union<"vertical", "horizontal", "both", "neither"> orientation, Union<"default", "always", "never"> horizontalscrollbarvisibility, int horizontalscrollbarheight, Union<"default", "always", "never"> verticalscrollbarvisibility, int verticalscrollbarwidth, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.ScrollView:new(options) -- LOVELi.ScrollView LOVELi.ScrollView:new( { Action<LOVELi.ScrollView sender, int dx, int dy> scrolled, Union<"vertical", "horizontal", "both", "neither"> orientation, Union<"default", "always", "never"> horizontalscrollbarvisibility, int horizontalscrollbarheight, int horizontalscrollbarincrement, Union<"default", "always", "never"> verticalscrollbarvisibility, int verticalscrollbarwidth, int verticalscrollbarincrement, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
 	o.scrolled = options.scrolled
 	o.orientation = LOVELi.Property.parse(options.orientation or "vertical")
