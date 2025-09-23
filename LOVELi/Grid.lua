@@ -288,8 +288,8 @@ function LOVELi.Grid:arrange(screenx, screeny, screenwidth, screenheight, viewpo
 					control:arrange(
 						screenx + self:getmargin():getleft() + column:getx() + control:getx() + horizontalalignment,
 						screeny + self:getmargin():gettop() + row:gety() + control:gety() + verticalalignment, 
-						column:getdesiredwidth(), 
-						row:getdesiredheight(),
+						control:getdesiredwidth() + control:getmargin():gethorizontal(), 
+						control:getdesiredheight() + control:getmargin():getvertical(),
 						
 						LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() + column:getx() ),
 						LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() + row:gety() ),

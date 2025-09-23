@@ -183,7 +183,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 			direction = "d"
 		end		
 		if direction == "u" or direction == "d" then
-			local controls = self:getcontrols()
+			local controls = self:getvisiblecontrols()
 			local oldfocusedcontrol = self.focusedcontrol
 			local newfocusedcontrol	= 0
 			if direction == "u" then
@@ -243,7 +243,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 			if self.focusedcontrol > 0 then
 				local events = self:geteventhandler("keypressed")
 				if events then
-					local controls = self:getcontrols()
+					local controls = self:getvisiblecontrols()
 					for _, event in ipairs(events) do
 						if event.control == controls[self.focusedcontrol] then
 							event.callback(key, scancode, isrepeat)
@@ -260,7 +260,7 @@ function LOVELi.LayoutManager:textinput(text)
 		if self.focusedcontrol > 0 then
 			local events = self:geteventhandler("textinput")
 			if events then
-				local controls = self:getcontrols()
+				local controls = self:getvisiblecontrols()
 				for _, event in ipairs(events) do
 					if event.control == controls[self.focusedcontrol] then
 						event.callback(text)
@@ -273,7 +273,7 @@ function LOVELi.LayoutManager:textinput(text)
 end
 function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 	if self:getisenabled() then
-		local controls = self:getcontrols()
+		local controls = self:getvisiblecontrols()
 		local oldfocusedcontrol = self.focusedcontrol
 		local newfocusedcontrol = 0
 		local events = self:geteventhandler("mousepressed")
