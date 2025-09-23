@@ -101,7 +101,7 @@ function LOVELi.Border:measure(availablewidth, availableheight) -- override
 						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " Border.")
 					end
 					local controldimension = getcontrolmeasure(control, getdesireddimension() - getdimensionpadding() )
-					if controldimension > 0 then
+					if controldimension > 0 and control:getisvisible() then
 						controldimension = controldimension + getdimensionpadding()
 						if controldimension > maxdimension then
 							maxdimension = controldimension

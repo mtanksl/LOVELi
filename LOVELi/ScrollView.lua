@@ -233,7 +233,7 @@ function LOVELi.ScrollView:measure(availablewidth, availableheight) -- override
 					else
 						controldimension = getcontrolmeasure(control, math.huge) 
 					end
-					if controldimension > 0 then
+					if controldimension > 0 and control:getisvisible() then
 						controldimension = controldimension + getscrollbardimension()
 						if controldimension > maxdimension then
 							maxdimension = controldimension

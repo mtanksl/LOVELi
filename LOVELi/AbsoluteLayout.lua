@@ -70,7 +70,7 @@ function LOVELi.AbsoluteLayout:measure(availablewidth, availableheight) -- overr
 						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " AbsoluteLayout.")
 					end
 					local controldimension = getcontrolmeasure(control, getdesireddimension() - getcontrolaxis(control) )
-					if controldimension > 0 then
+					if controldimension > 0 and control:getisvisible() then
 						controldimension = controldimension + getcontrolaxis(control)
 						if controldimension > maxdimension then
 							maxdimension = controldimension

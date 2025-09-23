@@ -53,7 +53,6 @@ function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
 	self.availablewidth = availablewidth or self.availablewidth
 	self.availableheight = availableheight or self.availableheight
 	local function measure(dimension, availabledimension)	
-		--TODO: Handle invisible child
 		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
 		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
 		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
@@ -90,19 +89,29 @@ function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
 							end
 							proportions = proportions + 1
 						else
-							local controldimension = getcontrolmeasure(control, remaining - spacing) + spacing
-							maxdimension = maxdimension + controldimension
-							remaining = remaining - controldimension
+							local controldimension = getcontrolmeasure(control, remaining - spacing)
+							if controldimension > 0 and control:getisvisible() then
+								controldimension = controldimension + spacing
+								maxdimension = maxdimension + controldimension
+								remaining = remaining - controldimension
+							end
 						end
-						spacing = self:getspacing()
+						if control:getisvisible() then
+							spacing = self:getspacing()
+						end
 					end
 					spacing = 0
 					for _, control in ipairs(self:getcontrols() ) do
 						if getcontroldimension(control) == "*" then
-							local controldimension = getcontrolmeasure(control, remaining * 1 / proportions - spacing) + spacing
-							maxdimension = maxdimension + controldimension
+							local controldimension = getcontrolmeasure(control, remaining * 1 / proportions - spacing)
+							if controldimension > 0 and control:getisvisible() then
+								controldimension = controldimension + spacing
+								maxdimension = maxdimension + controldimension
+							end
 						end
-						spacing = self:getspacing()
+						if control:getisvisible() then
+							spacing = self:getspacing()
+						end
 					end
 				else
 					for _, control in ipairs(self:getcontrols() ) do
@@ -110,8 +119,10 @@ function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
 							error("Can not use \"*\" control inside an \"auto\" StackLayout.")
 						end
 						local controldimension = getcontrolmeasure(control, remaining)
-						if controldimension > maxdimension then
-							maxdimension = controldimension
+						if controldimension > 0 and control:getisvisible() then
+							if controldimension > maxdimension then
+								maxdimension = controldimension
+							end
 						end
 					end
 				end
@@ -156,7 +167,9 @@ function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight,
 				LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft(), self:getdesiredwidth() ),
 				LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop(), self:getdesiredheight() )				
 			)
-			offsetx = offsetx + control:getdesiredwidth() + control:getmargin():gethorizontal() + self:getspacing()
+			if control:getisvisible() then
+				offsetx = offsetx + control:getdesiredwidth() + control:getmargin():gethorizontal() + self:getspacing()
+			end
 		else			
 			local horizontalalignment
 			if control:gethorizontaloptions() == "start" then
@@ -177,7 +190,9 @@ function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight,
 				LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft(), self:getdesiredwidth() ),
 				LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop(), self:getdesiredheight() )
 			)
-			offsety = offsety + control:getdesiredheight() + control:getmargin():getvertical() + self:getspacing()
+			if control:getisvisible() then
+				offsety = offsety + control:getdesiredheight() + control:getmargin():getvertical() + self:getspacing()
+			end
 		end
 	end	
 end

@@ -79,7 +79,7 @@ function LOVELi.ContentView:measure(availablewidth, availableheight) -- override
 						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " ContentView.")
 					end
 					local controldimension = getcontrolmeasure(control, getdesireddimension() )
-					if controldimension > 0 then
+					if controldimension > 0 and control:getisvisible() then
 						controldimension = controldimension
 						if controldimension > maxdimension then
 							maxdimension = controldimension

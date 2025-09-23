@@ -72,7 +72,6 @@ end
 function LOVELi.Grid:measure(availablewidth, availableheight) -- override
 	self.availablewidth = availablewidth or self.availablewidth
 	self.availableheight = availableheight or self.availableheight
-	--TODO: Handle invisible child
 	if availablewidth then
 		if availablewidth <= 0 or not self:getisvisible() then
 			self.desiredwidth = 0 
@@ -114,17 +113,16 @@ function LOVELi.Grid:measure(availablewidth, availableheight) -- override
 								else
 									control:measure(math.huge, nil)
 									local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
-									if width > maxwidth then
-										maxwidth = width
+									if width > 0 and control:getisvisible() then
+										if width > maxwidth then
+											maxwidth = width
+										end
 									end
 								end
 							end
 						end
 					end
 					if #skipped > 0 then
-						if maxwidth == 0 then
-							--TODO: Warning?
-						end
 						for _, control in ipairs(skipped) do
 							control:measure(maxwidth, nil)
 						end
@@ -205,17 +203,16 @@ function LOVELi.Grid:measure(availablewidth, availableheight) -- override
 								else
 									control:measure(nil, math.huge)
 									local height = control:getdesiredheight() + control:getmargin():gethorizontal()
-									if height > maxheight then
-										maxheight = height
+									if height > 0 and control:getisvisible() then
+										if height > maxheight then
+											maxheight = height
+										end
 									end
 								end
 							end
 						end
 					end
 					if #skipped > 0 then
-						if maxheight == 0 then
-							--TODO: Warning?
-						end
 						for _, control in ipairs(skipped) do
 							control:measure(nil, maxheight)
 						end
