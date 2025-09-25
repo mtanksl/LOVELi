@@ -23,10 +23,14 @@
 LOVELi.ImageButton = {}
 LOVELi.ImageButton.__index = LOVELi.ImageButton
 setmetatable(LOVELi.ImageButton, LOVELi.View)
-function LOVELi.ImageButton:new(options) -- LOVELi.Button LOVELi.ImageButton:new( { Action<LOVELi.Button sender> clicked, string source, Union<"aspectfit", "aspectfill", "fill"> aspect, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.ImageButton:new(options) -- LOVELi.Button LOVELi.ImageButton:new( { Action<LOVELi.Button sender> clicked, Union<string, Image> source, Union<"aspectfit", "aspectfill", "fill"> aspect, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
 	o.clicked = options.clicked
-	o.image = LOVELi.Property.parse(love.graphics.newImage(options.source) )
+	if type(options.source) == "string" then
+		o.image = LOVELi.Property.parse(love.graphics.newImage(options.source) )
+	else
+		o.image = LOVELi.Property.parse(options.source)
+	end
 	o.aspect = LOVELi.Property.parse(options.aspect or "aspectfit")	
 	return o
 end
@@ -68,29 +72,22 @@ function LOVELi.ImageButton:init(layoutmanager) -- override
 	end)
 end
 function LOVELi.ImageButton:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth or self.availablewidth
-	self.availableheight = availableheight or self.availableheight
-	local function measure(dimension, availabledimension)
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		local function getimagedimension() if dimension == "width" then return self:getimage():getWidth() else return self:getimage():getHeight() end end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-			elseif getdimension() == "*" then
-				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-			elseif getdimension() == "auto" then
-				setdesireddimension(getimagedimension() )
-			else
-				setdesireddimension(getdimension() )
-			end
-		end
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		self.desiredwidth = self:getimage():getWidth()
+	else
+		self.desiredwidth = self:getwidth()
 	end
-	measure("width", availablewidth)
-	measure("height", availableheight)
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		self.desiredheight = self:getimage():getHeight()
+	else
+		self.desiredheight = self:getheight()
+	end
 end
 function LOVELi.ImageButton:render(x, y) -- override
 	if self:getlayoutmanager():getshowlayoutlines() then

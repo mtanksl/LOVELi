@@ -25,17 +25,13 @@ LOVELi.ColumnDefinition.__index = LOVELi.ColumnDefinition
 function LOVELi.ColumnDefinition:new(width) -- LOVELi.ColumnDefinition LOVELi.ColumnDefinition:new(Union<"1*", "2*", ..., "auto", int> width)
 	local o = {
 		width = width,
-		x = nil,
-		desiredwidth = nil
+		desiredwidth = 0
 	}
 	setmetatable(o, self)
 	return o
 end
 function LOVELi.ColumnDefinition:getwidth()
 	return self.width
-end
-function LOVELi.ColumnDefinition:getx()
-	return self.x
 end
 function LOVELi.ColumnDefinition:getdesiredwidth()
 	return self.desiredwidth

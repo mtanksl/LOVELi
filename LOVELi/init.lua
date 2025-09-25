@@ -42,6 +42,7 @@ local classes = {
 	"ProgressBar",
 	"Slider",
 	"TextBox",
+	"MaskedTextBox",
 	"Border",
 	-- Layout
 	"ContentView",
@@ -49,6 +50,7 @@ local classes = {
 	"AbsoluteLayout",
 	"StackLayout",
 	"Grid",
+	"FlexLayout",
 	-- Manager
 	"LayoutManager"
 }

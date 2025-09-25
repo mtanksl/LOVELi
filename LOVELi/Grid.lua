@@ -70,187 +70,350 @@ function LOVELi.Grid:addcolumn(width)
 	table.insert(self.columns,  LOVELi.ColumnDefinition:new(width) )
 end
 function LOVELi.Grid:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth or self.availablewidth
-	self.availableheight = availableheight or self.availableheight
-	if availablewidth then
-		if availablewidth <= 0 or not self:getisvisible() then
-			self.desiredwidth = 0 
-			for _, control in ipairs(self:getcontrols() ) do
-				control:measure(0, nil)
-			end
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		self.desiredwidth = math.huge
+	else
+		self.desiredwidth = self:getwidth()
+	end
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		self.desiredheight = math.huge
+	else
+		self.desiredheight = self:getheight()
+	end
+	-- start	
+	local proportionswidth = 0
+	for i = 1, #self.columns do
+		local column = self.columns[i]
+		if type(column:getwidth() ) == "number" then
+		elseif column:getwidth() == "auto" then
 		else
-			if self:getwidth() == "*" then
-				self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
-			elseif self:getwidth() == "auto" then
-				self.desiredwidth = availablewidth - self:getmargin():gethorizontal()
-			else
-				self.desiredwidth = self:getwidth() 
-			end				
-			local widthremaining = self:getdesiredwidth()
-			local widthproportions = 0
-			for i = 1, #self.columns do
-				local column = self.columns[i]
-				if type(column:getwidth() ) == "number" then
-					for j = 1, #self.rows do
-						local controls = self:getcontrol(j, i)
-						if controls then
-							for _, control in ipairs(controls) do
-								control:measure(column:getwidth(), nil)
-							end
+			if self:getwidth() == "auto" then
+				error("Can not use \"*\" width column definition inside an \"auto\" width Grid.")
+			end
+			local proportionwidth = tonumber(string.sub(column:getwidth(), 1, -2) )
+			proportionswidth = proportionswidth + proportionwidth
+		end
+		column.desiredwidth = 0
+	end
+	local proportionsheight = 0
+	for j = 1, #self.rows do
+		local row = self.rows[j]
+		if type(row:getheight() ) == "number" then
+		elseif row:getheight() == "auto" then
+		else
+			if self:getheight() == "auto" then
+				error("Can not use \"*\" height column definition inside an \"auto\" height Grid.")
+			end
+			local proportionheight = tonumber(string.sub(row:getheight(), 1, -2) )
+			proportionsheight = proportionsheight + proportionheight
+		end
+		row.desiredheight = 0
+	end
+	-- number x number
+	for i = 1, #self.columns do
+		local column = self.columns[i]
+		if type(column:getwidth() ) == "number" then
+			for j = 1, #self.rows do
+				local row = self.rows[j]
+				if type(row:getheight() ) == "number" then
+					local controls = self:getcontrol(j, i)
+					if controls then
+						for _, control in ipairs(controls) do
+							control:measure(column:getwidth(), row:getheight() )
 						end
 					end
-					column.desiredwidth = column:getwidth()
-					widthremaining = widthremaining - column:getdesiredwidth()
-				elseif column:getwidth() == "auto" then
-					local maxwidth = 0
-					local skipped = {}
-					for j = 1, #self.rows do
-						local controls = self:getcontrol(j, i)
-						if controls then
-							for _, control in ipairs(controls) do
-								if control:getwidth() == "*" then
-									table.insert(skipped, control)
-								else
-									control:measure(math.huge, nil)
-									local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
-									if width > 0 and control:getisvisible() then
-										if width > maxwidth then
-											maxwidth = width
-										end
-									end
+					row.desiredheight = row:getheight()
+				end
+			end
+			column.desiredwidth = column:getwidth()
+		end
+	end
+	-- number x auto
+	for i = 1, #self.columns do
+		local column = self.columns[i]
+		if type(column:getwidth() ) == "number" then
+			for j = 1, #self.rows do
+				local row = self.rows[j]
+				if row:getheight() == "auto" then
+					local maxheight = 0
+					local controls = self:getcontrol(j, i)
+					if controls then
+						for _, control in ipairs(controls) do
+							if control:getheight() == "*" then
+								error("Can not use \"*\" height control inside an \"auto\" height column definition.")
+							end
+							control:measure(column:getwidth(), math.huge)
+							if control:getisvisible() then
+								local height = control:getdesiredheight() + control:getmargin():getvertical()
+								if height > maxheight then
+									maxheight = height
 								end
 							end
 						end
 					end
-					if #skipped > 0 then
-						for _, control in ipairs(skipped) do
-							control:measure(maxwidth, nil)
-						end
-					end
-					column.desiredwidth = maxwidth
-					widthremaining = widthremaining - column:getdesiredwidth()
-				else
-					if self:getwidth() == "auto" then
-						error("Can not use \"*\" width column definition inside an \"auto\" width Grid.")
-					end
-					local proportion = tonumber(string.sub(column:getwidth(), 1, -2) )
-					widthproportions = widthproportions + proportion
+					row.desiredheight = math.max(row:getdesiredheight(), maxheight)
 				end
 			end
-			local sumwidth = 0
-			for i = 1, #self.columns do
-				local column = self.columns[i]
-				if type(column:getwidth() ) == "number" then
-				elseif column:getwidth() == "auto" then
-				else
-					local proportion = tonumber(string.sub(column:getwidth(), 1, -2) )
-					for j = 1, #self.rows do
-						local controls = self:getcontrol(j, i)
-						if controls then
-							for _, control in ipairs(controls) do
-								control:measure(widthremaining * proportion / widthproportions, nil)
+			column.desiredwidth = column:getwidth()
+		end
+	end
+	-- auto x number
+	for i = 1, #self.columns do
+		local column = self.columns[i]
+		if column:getwidth() == "auto" then
+			local maxwidth = 0
+			for j = 1, #self.rows do
+				local row = self.rows[j]
+				if type(row:getheight() ) == "number" then
+					local controls = self:getcontrol(j, i)
+					if controls then
+						for _, control in ipairs(controls) do
+							if control:getwidth() == "*" then
+								error("Can not use \"*\" width control inside an \"auto\" width column definition.")
+							end
+							control:measure(math.huge, row:getheight() )
+							if control:getisvisible() then
+								local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
+								if width > maxwidth then
+									maxwidth = width
+								end
 							end
 						end
 					end
-					column.desiredwidth = widthremaining * proportion / widthproportions
+					row.desiredheight = row:getheight()
 				end
-				column.x = sumwidth
-				sumwidth = sumwidth + column:getdesiredwidth()
 			end
-			if self:getwidth()  == "auto" then			
-				self.desiredwidth = sumwidth
+			column.desiredwidth = math.max(column:getdesiredwidth(), maxwidth)
+		end
+	end
+	-- auto x auto
+	for i = 1, #self.columns do
+		local column = self.columns[i]
+		if column:getwidth() == "auto" then
+			local maxwidth = 0
+			for j = 1, #self.rows do
+				local row = self.rows[j]
+				if row:getheight() == "auto" then
+					local maxheight = 0
+					local controls = self:getcontrol(j, i)
+					if controls then
+						for _, control in ipairs(controls) do							
+							if control:getwidth() == "*" then
+								error("Can not use \"*\" width control inside an \"auto\" width column definition.")
+							end
+							if control:getheight() == "*" then
+								error("Can not use \"*\" height control inside an \"auto\" height column definition.")
+							end
+							control:measure(math.huge, math.huge)
+							if control:getisvisible() then
+								local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
+								if width > maxwidth then
+									maxwidth = width
+								end
+								local height = control:getdesiredheight() + control:getmargin():getvertical()
+								if height > maxheight then
+									maxheight = height
+								end
+							end
+						end
+					end
+					row.desiredheight = math.max(row:getdesiredheight(), maxheight)
+				end
+			end
+			column.desiredwidth = math.max(column:getdesiredwidth(), maxwidth)
+		end
+	end
+	-- remaining
+	if proportionswidth > 0 or proportionsheight > 0 then
+		local remainingwidth
+		local remainingheight
+		local calculatewidth = true
+		local calculateheight = true
+		while true do			
+			if calculatewidth then
+				calculatewidth = false
+				remainingwidth = self:getdesiredwidth()
+				for i = 1, #self.columns do
+					local column = self.columns[i]
+					if type(column:getwidth() ) == "number" or column:getwidth() == "auto" then
+						remainingwidth = remainingwidth - column:getdesiredwidth()
+					end
+				end
+				-- * x auto
+				for i = 1, #self.columns do
+					local column = self.columns[i]
+					if type(column:getwidth() ) == "number" then
+					elseif column:getwidth() == "auto" then	
+					else
+						local proportionwidth = tonumber(string.sub(column:getwidth(), 1, -2) )
+						for j = 1, #self.rows do
+							local row = self.rows[j]
+							if row:getheight() == "auto" then
+								local maxheight = 0
+								local controls = self:getcontrol(j, i)
+								if controls then
+									for _, control in ipairs(controls) do
+										if control:getheight() == "*" then
+											error("Can not use \"*\" height control inside an \"auto\" height column definition.")
+										end
+										control:measure(math.max(0, remainingwidth * proportionwidth / proportionswidth), math.huge)
+										if control:getisvisible() then
+											local height = control:getdesiredheight() + control:getmargin():getvertical()
+											if height > maxheight then
+												maxheight = height
+											end
+										end
+									end
+								end
+								if maxheight > row:getdesiredheight() then
+									calculateheight = true
+									row.desiredheight = maxheight
+								end
+							end
+						end
+						column.desiredwidth = math.max(0, remainingwidth * proportionwidth / proportionswidth)
+					end
+				end
+			end
+			if calculateheight then
+				calculateheight = false
+				remainingheight = self:getdesiredheight()
+				for j = 1, #self.rows do
+					local row = self.rows[j]
+					if type(row:getheight() ) == "number" or row:getheight() == "auto" then
+						remainingheight = remainingheight - row:getdesiredheight()
+					end
+				end
+				-- auto x *
+				for i = 1, #self.columns do
+					local column = self.columns[i]
+					if column:getwidth() == "auto" then
+						local maxwidth = 0
+						for j = 1, #self.rows do
+							local row = self.rows[j]
+							if type(row:getheight() ) == "number" then
+							elseif row:getheight() == "auto" then
+							else	
+								local proportionheight = tonumber(string.sub(row:getheight(), 1, -2) )
+								local controls = self:getcontrol(j, i)
+								if controls then
+									for _, control in ipairs(controls) do
+										if control:getwidth() == "*" then
+											error("Can not use \"*\" width control inside an \"auto\" width column definition.")
+										end
+										control:measure(math.huge, math.max(0, remainingheight * proportionheight / proportionsheight) )
+										if control:getisvisible() then
+											local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
+											if width > maxwidth then
+												maxwidth = width
+											end
+										end
+									end
+								end
+								row.desiredheight = math.max(0, remainingheight * proportionheight / proportionsheight)
+							end
+						end
+						if maxwidth > column:getdesiredwidth() then
+							calculatewidth = true
+							column.desiredwidth = maxwidth
+						end
+					end
+				end
+			end
+			if not calculatewidth and not calculateheight then
+				break
+			end
+		end	
+		-- * x number
+		for i = 1, #self.columns do
+			local column = self.columns[i]
+			if type(column:getwidth() ) == "number" then
+			elseif column:getwidth() == "auto" then	
+			else
+				local proportionwidth = tonumber(string.sub(column:getwidth(), 1, -2) )
+				for j = 1, #self.rows do
+					local row = self.rows[j]
+					if type(row:getheight() ) == "number" then
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								control:measure(math.max(0, remainingwidth * proportionwidth / proportionswidth), row:getheight() )
+							end
+						end
+						row.desiredheight = row:getheight()
+					end
+				end
+				column.desiredwidth = math.max(0, remainingwidth * proportionwidth / proportionswidth)
+			end
+		end		
+		-- number x *
+		for i = 1, #self.columns do
+			local column = self.columns[i]
+			if type(column:getwidth() ) == "number" then
+				for j = 1, #self.rows do
+					local row = self.rows[j]
+					if type(row:getheight() ) == "number" then
+					elseif row:getheight() == "auto" then
+					else	
+						local proportionheight = tonumber(string.sub(row:getheight(), 1, -2) )
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								control:measure(column:getwidth(), math.max(0, remainingheight * proportionheight / proportionsheight) )
+							end
+						end
+						row.desiredheight = math.max(0, remainingheight * proportionheight / proportionsheight)
+					end
+				end
+				column.desiredwidth = column:getwidth()
+			end
+		end
+		-- * x *
+		for i = 1, #self.columns do
+			local column = self.columns[i]
+			if type(column:getwidth() ) == "number" then
+			elseif column:getwidth() == "auto" then	
+			else
+				local proportionwidth = tonumber(string.sub(column:getwidth(), 1, -2) )
+				for j = 1, #self.rows do
+					local row = self.rows[j]
+					if type(row:getheight() ) == "number" then
+					elseif row:getheight() == "auto" then
+					else	
+						local proportionheight = tonumber(string.sub(row:getheight(), 1, -2) )
+						local controls = self:getcontrol(j, i)
+						if controls then
+							for _, control in ipairs(controls) do
+								control:measure(math.max(0,remainingwidth * proportionwidth / proportionswidth), math.max(0,remainingheight * proportionheight / proportionsheight) )
+							end
+						end
+						row.desiredheight = math.max(0,remainingheight * proportionheight / proportionsheight)
+					end
+				end
+				column.desiredwidth = math.max(0, remainingwidth * proportionwidth / proportionswidth)
 			end
 		end
 	end
-	if availableheight then
-		if availableheight <= 0 or not self:getisvisible() then
-			self.desiredheight = 0 
-			for _, control in ipairs(self:getcontrols() ) do
-				control:measure(nil, 0)
-			end
-		else
-			if self:getheight() == "*" then
-				self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
-			elseif self:getheight() == "auto" then
-				self.desiredheight = availableheight - self:getmargin():getvertical()
-			else
-				self.desiredheight = self:getheight()
-			end		
-			local heightremaining = self:getdesiredheight()
-			local heightproportions = 0
-			for j = 1, #self.rows do
-				local row = self.rows[j]
-				if type(row:getheight() ) == "number" then
-					for i = 1, #self.columns do
-						local controls = self:getcontrol(j, i)
-						if controls then
-							for _, control in ipairs(controls) do
-								control:measure(nil, row:getheight() )
-							end
-						end
-					end				
-					row.desiredheight = row:getheight()
-					heightremaining = heightremaining - row:getdesiredheight()
-				elseif row:getheight() == "auto" then
-					local maxheight = 0
-					local skipped = {}
-					for i = 1, #self.columns do
-						local controls = self:getcontrol(j, i)
-						if controls then
-							for _, control in ipairs(controls) do
-								if control:getheight() == "*" then
-									table.insert(skipped, control)
-								else
-									control:measure(nil, math.huge)
-									local height = control:getdesiredheight() + control:getmargin():gethorizontal()
-									if height > 0 and control:getisvisible() then
-										if height > maxheight then
-											maxheight = height
-										end
-									end
-								end
-							end
-						end
-					end
-					if #skipped > 0 then
-						for _, control in ipairs(skipped) do
-							control:measure(nil, maxheight)
-						end
-					end
-					row.desiredheight = maxheight
-					heightremaining = heightremaining - row:getdesiredheight()
-				else
-					if self:getheight() == "auto" then
-						error("Can not use \"*\" height row definition inside an \"auto\" height Grid.")
-					end
-					local proportion = tonumber(string.sub(row:getheight(), 1, -2) )
-					heightproportions = heightproportions + proportion
-				end
-			end
-			local sumheight = 0
-			for j = 1, #self.rows do
-				local row = self.rows[j]
-				if type(row:getheight() ) == "number" then
-				elseif row:getheight() == "auto" then
-				else
-					local proportion = tonumber(string.sub(row:getheight(), 1, -2) )
-					for i = 1, #self.columns do
-						local controls = self:getcontrol(j, i)
-						if controls then
-							for _, control in ipairs(controls) do
-								control:measure(nil, heightremaining * proportion / heightproportions)
-							end
-						end
-					end
-					row.desiredheight = heightremaining * proportion / heightproportions
-				end
-				row.y = sumheight
-				sumheight = sumheight + row:getdesiredheight()
-			end
-			if self:getheight() == "auto" then			
-				self.desiredheight = sumheight
-			end
+	-- end
+	if self:getwidth() == "auto" then
+		local desiredwidth = 0
+		for i = 1, #self.columns do
+			desiredwidth = desiredwidth + column:getdesiredwith()
+		end	
+		self.desiredwidth = desiredwidth
+	end
+	if self:getheight() == "auto" then
+		local desiredheight = 0
+		for j = 1, #self.rows do
+			desiredheight = desiredheight + row:getdesiredheight()
 		end
+		self.desiredheight = desiredheight
 	end
 end
 function LOVELi.Grid:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
@@ -262,8 +425,10 @@ function LOVELi.Grid:arrange(screenx, screeny, screenwidth, screenheight, viewpo
 	self.viewporty = viewporty
 	self.viewportwidth = viewportwidth
 	self.viewportheight = viewportheight
+	local offsetx =  0
 	for i = 1, #self.columns do
 		local column = self.columns[i]
+		local offsety =  0
 		for j = 1, #self.rows do
 			local row = self.rows[j]
 			local controls = self:getcontrol(j, i)
@@ -273,7 +438,7 @@ function LOVELi.Grid:arrange(screenx, screeny, screenwidth, screenheight, viewpo
 					if control:gethorizontaloptions() == "start" then
 						horizontalalignment = 0
 					elseif control:gethorizontaloptions() == "center" then
-						horizontalalignment = column:getdesiredwidth() / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
+						horizontalalignment = ( column:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) ) / 2
 					elseif control:gethorizontaloptions() == "end" then
 						horizontalalignment = column:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
 					end
@@ -281,24 +446,26 @@ function LOVELi.Grid:arrange(screenx, screeny, screenwidth, screenheight, viewpo
 					if control:getverticaloptions() == "start" then
 						verticalalignment = 0
 					elseif control:getverticaloptions() == "center" then
-						verticalalignment = row:getdesiredheight() / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
+						verticalalignment = ( row:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) ) / 2
 					elseif control:getverticaloptions() == "end" then
 						verticalalignment = row:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) 
 					end				
 					control:arrange(
-						screenx + self:getmargin():getleft() + column:getx() + control:getx() + horizontalalignment,
-						screeny + self:getmargin():gettop() + row:gety() + control:gety() + verticalalignment, 
+						screenx + self:getmargin():getleft() + offsetx + control:getx() + horizontalalignment,
+						screeny + self:getmargin():gettop() + offsety + control:gety() + verticalalignment, 
 						control:getdesiredwidth() + control:getmargin():gethorizontal(), 
 						control:getdesiredheight() + control:getmargin():getvertical(),
 						
-						LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() + column:getx() ),
-						LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() + row:gety() ),
-						LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft() + column:getx(), column:getdesiredwidth() ),
-						LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop() + row:gety(), row:getdesiredheight() )
+						LOVELi.Math.clipx(viewportx, screenx + self:getmargin():getleft() + offsetx ),
+						LOVELi.Math.clipy(viewporty, screeny + self:getmargin():gettop() + offsety ),
+						LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx + self:getmargin():getleft() + offsetx, column:getdesiredwidth() ),
+						LOVELi.Math.clipheight(viewporty, viewportheight, screeny + self:getmargin():gettop() + offsety, row:getdesiredheight() )
 					)
 				end		
 			end
+			offsety = offsety + row:getdesiredheight()
 		end
+		offsetx = offsetx + column:getdesiredwidth()
 	end
 end
 function LOVELi.Grid:render(x, y) -- override
@@ -313,38 +480,46 @@ function LOVELi.Grid:render(x, y) -- override
 				self:getdesiredheight() + self:getmargin():getvertical() )
 		end
 		love.graphics.setColor(1, 1, 1)
+		local offsety = 0
 		for _, row in ipairs(self.rows) do
-			love.graphics.line(
-				x + self:getmargin():getleft(), 
-				y + row:gety() + self:getmargin():gettop(), 
-				x + self:getdesiredwidth() + self:getmargin():getleft(), 
-				y + row:gety() + self:getmargin():gettop() )
-			love.graphics.print(
-				row:getheight(),
-				x + self:getmargin():getleft(),
-				y + row:gety() + self:getmargin():gettop() + row:getdesiredheight() / 2 + love.graphics.getFont():getWidth(tostring(row:getheight() ) ) / 2, 
-				math.rad(-90) )
+			if row:getdesiredheight() > 0 then
+				love.graphics.line(
+					x + self:getmargin():getleft(), 
+					y + offsety + self:getmargin():gettop(), 
+					x + self:getdesiredwidth() + self:getmargin():getleft(), 
+					y + offsety + self:getmargin():gettop() )
+				love.graphics.print(
+					row:getheight(),
+					x + self:getmargin():getleft(),
+					y + offsety + self:getmargin():gettop() + (row:getdesiredheight() + love.graphics.getFont():getWidth(tostring(row:getheight() ) ) ) / 2, 
+					math.rad(-90) )
+				offsety = offsety + row:getdesiredheight()
+			end
 		end
 		love.graphics.line(
 			x + self:getmargin():getleft(), 
-			y + self:getdesiredheight() + self:getmargin():gettop(), 
+			y + offsety + self:getmargin():gettop(), 
 			x + self:getdesiredwidth() + self:getmargin():getleft(), 
-			y + self:getdesiredheight() + self:getmargin():gettop() )
+			y + offsety + self:getmargin():gettop() )
+		local offsetx = 0
 		for _, column in ipairs(self.columns) do
-			love.graphics.line(
-				x + column:getx() + self:getmargin():getleft(), 
-				y + self:getmargin():gettop(), 
-				x + column:getx() + self:getmargin():getleft(), 
-				y + self:getdesiredheight() + self:getmargin():gettop() )			
-			love.graphics.print(
-				column:getwidth(),
-				x + column:getx() + self:getmargin():getleft() + column:getdesiredwidth() / 2 - love.graphics.getFont():getWidth(tostring(column:getwidth() ) ) / 2, 
-				y + self:getmargin():gettop() )
+			if column:getdesiredwidth() > 0 then
+				love.graphics.line(
+					x + offsetx + self:getmargin():getleft(), 
+					y + self:getmargin():gettop(), 
+					x + offsetx + self:getmargin():getleft(), 
+					y + self:getdesiredheight() + self:getmargin():gettop() )			
+				love.graphics.print(
+					column:getwidth(),
+					x + offsetx + self:getmargin():getleft() + (column:getdesiredwidth() - love.graphics.getFont():getWidth(tostring(column:getwidth() ) ) ) / 2, 
+					y + self:getmargin():gettop() )
+				offsetx = offsetx + column:getdesiredwidth()
+			end
 		end
 		love.graphics.line(
-			x + self:getdesiredwidth() + self:getmargin():getleft(), 
+			x + offsetx + self:getmargin():getleft(), 
 			y + self:getmargin():gettop(), 
-			x + self:getdesiredwidth() + self:getmargin():getleft(), 
+			x + offsetx + self:getmargin():getleft(), 
 			y + self:getdesiredheight() + self:getmargin():gettop() )
 	end
 end

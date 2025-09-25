@@ -92,28 +92,22 @@ function LOVELi.CheckBox:init(layoutmanager) -- override
 	end)
 end
 function LOVELi.CheckBox:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth or self.availablewidth
-	self.availableheight = availableheight or self.availableheight
-	local function measure(dimension, availabledimension, auto)
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-			elseif getdimension() == "*" then
-				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-			elseif getdimension() == "auto" then
-				setdesireddimension(auto)
-			else
-				setdesireddimension(getdimension() )
-			end
-		end
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		self.desiredwidth = 20
+	else
+		self.desiredwidth = self:getwidth()
 	end
-	measure("width", availablewidth, 20)
-	measure("height", availableheight, 20)
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		self.desiredheight = 20
+	else
+		self.desiredheight = self:getheight()
+	end
 end
 function LOVELi.CheckBox:render(x, y) -- override
 	if self:getlayoutmanager():getshowlayoutlines() then
@@ -134,7 +128,7 @@ function LOVELi.CheckBox:render(x, y) -- override
 			self:getdesiredwidth(), 
 			self:getdesiredheight() )
 	end
-	love.graphics.setColor(self:getbackgroundcolor():getred(), self:getbackgroundcolor():getgreen(), self:getbackgroundcolor():getblue(), self:getbackgroundcolor():getalpha() )
+	love.graphics.setColor(self:getbackgroundcolor():getrgba() )
 	love.graphics.rectangle(
 		"fill", 
 		x + self:getmargin():getleft(), 
@@ -143,7 +137,7 @@ function LOVELi.CheckBox:render(x, y) -- override
 		self:getdesiredheight() )	
 	if self:getischecked() == false then		
 	elseif self:getischecked() == true then
-		love.graphics.setColor(self:getforecolor():getred(), self:getforecolor():getgreen(), self:getforecolor():getblue(), self:getforecolor():getalpha() )
+		love.graphics.setColor(self:getforecolor():getrgba() )
 		love.graphics.line(
 			x + self:getmargin():getleft() + (self:getdesiredwidth() * 0.2), 
 			y + self:getmargin():gettop() + self:getdesiredheight() / 2, 			
@@ -155,14 +149,14 @@ function LOVELi.CheckBox:render(x, y) -- override
 			x + self:getmargin():getleft() + self:getdesiredwidth() - (self:getdesiredwidth() * 0.2), 
 			y + self:getmargin():gettop() + (self:getdesiredheight() * 0.2) )
 	else
-		love.graphics.setColor(self:getforecolor():getred(), self:getforecolor():getgreen(), self:getforecolor():getblue(), self:getforecolor():getalpha() )
+		love.graphics.setColor(self:getforecolor():getrgba() )
 		love.graphics.line(
 			x + self:getmargin():getleft() + (self:getdesiredwidth() * 0.2), 
 			y + self:getmargin():gettop() + self:getdesiredheight() / 2, 			
 			x + self:getmargin():getleft() + self:getdesiredwidth() - (self:getdesiredwidth() * 0.2), 
 			y + self:getmargin():gettop() + self:getdesiredheight() / 2)
 	end	
-	love.graphics.setColor(self:getbordercolor():getred(), self:getbordercolor():getgreen(), self:getbordercolor():getblue(), self:getbordercolor():getalpha() )
+	love.graphics.setColor(self:getbordercolor():getrgba() )
 	love.graphics.rectangle(
 		"line",
 		x + self:getmargin():getleft() + 0.5, 

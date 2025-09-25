@@ -36,55 +36,49 @@ function LOVELi.AbsoluteLayout:with(control)
 	return self
 end
 function LOVELi.AbsoluteLayout:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth or self.availablewidth
-	self.availableheight = availableheight or self.availableheight
-	local function measure(dimension, availabledimension)
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function getdesireddimension() if dimension == "width" then return self:getdesiredwidth() else return self:getdesiredheight() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		local function getcontrolaxis(control) if dimension == "width" then return control:getx() else return control:gety() end end
-		local function getcontroldimension(control) if dimension == "width" then return control:getwidth() else return control:getheight() end end
-		local function getcontroldimensionmargin(control) if dimension == "width" then return control:getmargin():gethorizontal() else return control:getmargin():getvertical() end end
-		local function getcontroldimensionrequest(control) if dimension == "width" then return control:getdesiredwidth() else return control:getdesiredheight() end end
-		local function getcontrolmeasure(control, value) if dimension == "width" then control:measure(value, nil) else control:measure(nil, value) end return getcontroldimensionrequest(control) + getcontroldimensionmargin(control) end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-				for _, control in ipairs(self:getcontrols() ) do
-					getcontrolmeasure(control, 0)
-				end
-			else
-				if getdimension() == "*" then
-					setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-				elseif getdimension() == "auto" then
-					setdesireddimension(availabledimension - getdimensionmargin() )
-				else
-					setdesireddimension(getdimension() )
-				end
-				local maxdimension = 0
-				for _, control in ipairs(self:getcontrols() ) do
-					if getcontroldimension(control) == "*" and getdimension() == "auto" then
-						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " AbsoluteLayout.")
-					end
-					local controldimension = getcontrolmeasure(control, getdesireddimension() - getcontrolaxis(control) )
-					if controldimension > 0 and control:getisvisible() then
-						controldimension = controldimension + getcontrolaxis(control)
-						if controldimension > maxdimension then
-							maxdimension = controldimension
-						end
-					end
-				end
-				if getdimension() == "auto" then
-					setdesireddimension(maxdimension)
-				end
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		self.desiredwidth = math.huge
+	else
+		self.desiredwidth = self:getwidth()
+	end
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		self.desiredheight = math.huge
+	else
+		self.desiredheight = self:getheight()
+	end
+	local desiredwidth = 0
+	local desiredheight = 0
+	for _, control in ipairs(self:getcontrols() ) do
+		if control:getwidth() == "*" and self:getwidth() == "auto" then
+			error("Can not use \"*\" width control inside an \"auto\" width AbsoluteLayout.")
+		end
+		if control:getheight() == "*" and self:getheight() == "auto" then
+			error("Can not use \"*\" height control inside an \"auto\" height AbsoluteLayout.")
+		end
+		control:measure(math.max(0, self:getdesiredwidth() - control:getx() ), math.max(0, self:getdesiredheight() - control:gety() ) )
+		if control:getisvisible() then
+			local width = control:getdesiredwidth() + control:getmargin():gethorizontal() + control:getx()
+			local height = control:getdesiredheight() + control:getmargin():getvertical() + control:gety()
+			if width > desiredwidth then
+				desiredwidth = width
+			end			
+			if height > desiredheight then
+				desiredheight = height
 			end
 		end
 	end
-	measure("width", availablewidth)
-	measure("height", availableheight)
+	if self:getwidth() == "auto" then
+		self.desiredwidth = desiredwidth
+	end
+	if self:getheight() == "auto" then
+		self.desiredheight = desiredheight
+	end
 end
 function LOVELi.AbsoluteLayout:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
 	self.screenx = screenx
@@ -100,7 +94,7 @@ function LOVELi.AbsoluteLayout:arrange(screenx, screeny, screenwidth, screenheig
 		if control:gethorizontaloptions() == "start" then
 			horizontalalignment = 0
 		elseif control:gethorizontaloptions() == "center" then
-			horizontalalignment = self:getdesiredwidth() / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
+			horizontalalignment = ( self:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) ) / 2
 		elseif control:gethorizontaloptions() == "end" then
 			horizontalalignment = self:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
 		end
@@ -108,7 +102,7 @@ function LOVELi.AbsoluteLayout:arrange(screenx, screeny, screenwidth, screenheig
 		if control:getverticaloptions() == "start" then
 			verticalalignment = 0
 		elseif control:getverticaloptions() == "center" then
-			verticalalignment = self:getdesiredheight() / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
+			verticalalignment = ( self:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) ) / 2
 		elseif control:getverticaloptions() == "end" then
 			verticalalignment = self:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) 
 		end

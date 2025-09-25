@@ -77,7 +77,7 @@ function LOVELi.AnimatedLabel:render(x, y) -- override
 			self:getdesiredwidth(), 
 			self:getdesiredheight() )
 	end
-	love.graphics.setColor(self:gettextcolor():getred(), self:gettextcolor():getgreen(), self:gettextcolor():getblue(), self:gettextcolor():getalpha() )
+	love.graphics.setColor(self:gettextcolor():getrgba() )
 	local wrappedtext
 	if self:getismultiline() then
 		_, wrappedtext = self:getfont():getWrap(string.sub(self:gettext(), 1, math.floor(self:getelapsed() / self:getduration() * #self:gettext() ) ), self:getdesiredwidth() )
@@ -89,7 +89,7 @@ function LOVELi.AnimatedLabel:render(x, y) -- override
 		if self:gethorizontaltextalignment() == "start" then
 			horizontaltextalignment = 0
 		elseif self:gethorizontaltextalignment() == "center" then
-			horizontaltextalignment = self:getdesiredwidth() / 2 - self:getfont():getWidth(text) / 2
+			horizontaltextalignment = ( self:getdesiredwidth() - self:getfont():getWidth(text) ) / 2
 		elseif self:gethorizontaltextalignment() == "end" then
 			horizontaltextalignment = self:getdesiredwidth() - self:getfont():getWidth(text)
 		end
@@ -97,7 +97,7 @@ function LOVELi.AnimatedLabel:render(x, y) -- override
 		if self:getverticaltextalignment() == "start" then
 			verticaltextalignment = 0
 		elseif self:getverticaltextalignment() == "center" then
-			verticaltextalignment = self:getdesiredheight() / 2 - #wrappedtext * self:getfont():getHeight() / 2
+			verticaltextalignment = ( self:getdesiredheight() - #wrappedtext * self:getfont():getHeight() ) / 2
 		elseif self:getverticaltextalignment() == "end" then
 			verticaltextalignment = self:getdesiredheight() - #wrappedtext * self:getfont():getHeight()
 		end

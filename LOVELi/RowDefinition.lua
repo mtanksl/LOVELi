@@ -25,17 +25,13 @@ LOVELi.RowDefinition.__index = LOVELi.RowDefinition
 function LOVELi.RowDefinition:new(height) -- LOVELi.RowDefinition LOVELi.RowDefinition:new(Union<"1*", "2*", ..., "auto", int> height)
 	local o = {
 		height = height,
-		y = nil,
-		desiredheight = nil	
+		desiredheight = 0	
 	}
 	setmetatable(o, self)
 	return o
 end
 function LOVELi.RowDefinition:getheight()
 	return self.height
-end
-function LOVELi.RowDefinition:gety()
-	return self.y
 end
 function LOVELi.RowDefinition:getdesiredheight()
 	return self.desiredheight

@@ -36,9 +36,9 @@ function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y
 		horizontaloptions = LOVELi.Property.parse(options.horizontaloptions or "start"),
 		verticaloptions = LOVELi.Property.parse(options.verticaloptions or "start"),		
 		name = LOVELi.Property.parse(options.name),
+		layoutmanager = nil,
 		parent = nil,
 		controls = {},
-		layoutmanager = nil,
 		availablewidth = nil,
 		availableheight = nil,		
 		desiredwidth = nil,
@@ -151,14 +151,14 @@ end
 function LOVELi.View:setisenabled(value)
 	self.isenabled:setvalue(value)
 end
+function LOVELi.View:getlayoutmanager()
+	return self.layoutmanager
+end
 function LOVELi.View:getparent()
 	return self.parent
 end
 function LOVELi.View:getcontrols()
 	return self.controls
-end
-function LOVELi.View:getlayoutmanager()
-	return self.layoutmanager
 end
 function LOVELi.View:getavailablewidth()
 	return self.availablewidth
@@ -211,12 +211,12 @@ end
 function LOVELi.View:getcanvas()
 	return self.canvas
 end
-function LOVELi.View:invalidatemeasure()
-	--TODO: Do not use, this function may be changed
+--TODO: Do not use
+function LOVELi.View:invalidatemeasure() 
 	self:measure(self.availablewidth, self.availableheight)
 end
-function LOVELi.View:invalidatearrange()
-	--TODO: Do not use, this function may be changed
+--TODO: Do not use
+function LOVELi.View:invalidatearrange() 
 	self:arrange(self.screenx, self.screeny, self.screenwidth, self.screenheight, self.viewportx, self.viewporty, self.viewportwidth, self.viewportheight)
 end
 function LOVELi.View:invalidate()
@@ -237,26 +237,20 @@ end
 function LOVELi.View:measure(availablewidth, availableheight) -- virtual
 	self.availablewidth = availablewidth
 	self.availableheight = availableheight
-	local function measure(dimension, availabledimension)
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-			elseif getdimension() == "*" then
-				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-			elseif getdimension() == "auto" then
-				error("View can not be set to auto.")
-			else
-				setdesireddimension(getdimension() )
-			end
-		end
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		error("View width can not be set to auto.")
+	else
+		self.desiredwidth = self:getwidth()
 	end
-	measure("width", availablewidth)
-	measure("height", availableheight)
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		error("View height can not be set to auto.")
+	else
+		self.desiredheight = self:getheight()
+	end
 end
 function LOVELi.View:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- virtual
 	self.screenx = screenx

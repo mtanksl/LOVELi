@@ -50,90 +50,129 @@ function LOVELi.StackLayout:with(control)
 	return self
 end
 function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth or self.availablewidth
-	self.availableheight = availableheight or self.availableheight
-	local function measure(dimension, availabledimension)	
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function getdesireddimension() if dimension == "width" then return self:getdesiredwidth() else return self:getdesiredheight() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		local function getcontroldimension(control) if dimension == "width" then return control:getwidth() else return control:getheight() end end
-		local function getcontroldimensionmargin(control) if dimension == "width" then return control:getmargin():gethorizontal() else return control:getmargin():getvertical() end end
-		local function getcontroldimensionrequest(control) if dimension == "width" then return control:getdesiredwidth() else return control:getdesiredheight() end end
-		local function getcontrolmeasure(control, value) if dimension == "width" then control:measure(value, nil) else control:measure(nil, value) end return getcontroldimensionrequest(control) + getcontroldimensionmargin(control) end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-				for _, control in ipairs(self:getcontrols() ) do
-					getcontrolmeasure(control, 0)
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		self.desiredwidth = math.huge
+	else
+		self.desiredwidth = self:getwidth()
+	end
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		self.desiredheight = math.huge
+	else
+		self.desiredheight = self:getheight()
+	end
+	local desiredwidth = 0
+	local desiredheight = 0
+	if self:getorientation() == "horizontal" then
+		local remainingwidth = self:getdesiredwidth()
+		local proportionswidth = 0
+		local spacingwidth = 0		
+		for _, control in ipairs(self:getcontrols() ) do
+			if control:getwidth() == "*" and self:getwidth() == "auto" then
+				error("Can not use \"*\" width control inside an \"auto\" width StackLayout.")
+			end
+			if control:getheight() == "*" and self:getheight() == "auto" then
+				error("Can not use \"*\" height control inside an \"auto\" height StackLayout.")
+			end
+			if control:getwidth() == "*" then
+				proportionswidth = proportionswidth + 1
+				if control:getisvisible() then
+					spacingwidth = self:getspacing()				
 				end
 			else
-				if getdimension() == "*" then
-					setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-				elseif getdimension() == "auto" then
-					setdesireddimension(availabledimension - getdimensionmargin() )
-				else
-					setdesireddimension(getdimension() )
+				control:measure(math.max(0, remainingwidth - spacingwidth), math.max(0, self:getdesiredheight()	) )
+				if control:getisvisible() then
+					local width = control:getdesiredwidth() + control:getmargin():gethorizontal() + spacingwidth
+					local height = control:getdesiredheight() + control:getmargin():getvertical()
+					desiredwidth = desiredwidth + width
+					if height > desiredheight then
+						desiredheight = height
+					end
+					remainingwidth = remainingwidth - width
+					spacingwidth = self:getspacing()
 				end
-				local maxdimension = 0
-				local remaining = getdesireddimension()
-				if (dimension == "width" and self:getorientation() == "horizontal") or (dimension == "height" and self:getorientation() == "vertical") then
-					local proportions = 0
-					local spacing = 0
-					for _, control in ipairs(self:getcontrols() ) do
-						if getcontroldimension(control) == "*" then
-							if getdimension() == "auto" then
-								error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " StackLayout.")
-							end
-							proportions = proportions + 1
-						else
-							local controldimension = getcontrolmeasure(control, remaining - spacing)
-							if controldimension > 0 and control:getisvisible() then
-								controldimension = controldimension + spacing
-								maxdimension = maxdimension + controldimension
-								remaining = remaining - controldimension
-							end
-						end
-						if control:getisvisible() then
-							spacing = self:getspacing()
-						end
+			end
+		end
+		spacingwidth = 0
+		for _, control in ipairs(self:getcontrols() ) do
+			if control:getwidth() == "*" then
+				control:measure(math.max(0, remainingwidth * 1 / proportionswidth - spacingwidth), math.max(0, self:getdesiredheight()	) )
+				if control:getisvisible() then
+					local width = control:getdesiredwidth() + control:getmargin():gethorizontal() + spacingwidth
+					local height = control:getdesiredheight() + control:getmargin():getvertical()
+					desiredwidth = desiredwidth + width
+					if height > desiredheight then
+						desiredheight = height
 					end
-					spacing = 0
-					for _, control in ipairs(self:getcontrols() ) do
-						if getcontroldimension(control) == "*" then
-							local controldimension = getcontrolmeasure(control, remaining * 1 / proportions - spacing)
-							if controldimension > 0 and control:getisvisible() then
-								controldimension = controldimension + spacing
-								maxdimension = maxdimension + controldimension
-							end
-						end
-						if control:getisvisible() then
-							spacing = self:getspacing()
-						end
-					end
-				else
-					for _, control in ipairs(self:getcontrols() ) do
-						if getcontroldimension(control) == "*" and getdimension() == "auto" then
-							error("Can not use \"*\" control inside an \"auto\" StackLayout.")
-						end
-						local controldimension = getcontrolmeasure(control, remaining)
-						if controldimension > 0 and control:getisvisible() then
-							if controldimension > maxdimension then
-								maxdimension = controldimension
-							end
-						end
-					end
+					spacingwidth = self:getspacing()
 				end
-				if getdimension() == "auto" then
-					setdesireddimension(maxdimension)
+			else
+				if control:getisvisible() then
+					spacingwidth = self:getspacing()				
+				end
+			end
+		end
+	else
+		local remainingheight = self:getdesiredheight()	
+		local proportionsheight = 0
+		local spacingheight = 0
+		for _, control in ipairs(self:getcontrols() ) do
+			if control:getwidth() == "*" and self:getwidth() == "auto" then
+				error("Can not use \"*\" width control inside an \"auto\" width StackLayout.")
+			end
+			if control:getheight() == "*" and self:getheight() == "auto" then
+				error("Can not use \"*\" height control inside an \"auto\" height StackLayout.")
+			end
+			if control:getheight() == "*" then
+				proportionsheight = proportionsheight + 1
+				if control:getisvisible() then
+					spacingheight = self:getspacing()
+				end
+			else			
+				control:measure(math.max(0, self:getdesiredwidth() ), math.max(0, remainingheight - spacingheight) )
+				if control:getisvisible() then
+					local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
+					local height = control:getdesiredheight() + control:getmargin():getvertical() + spacingheight
+					if width > desiredwidth then
+						desiredwidth = width
+					end
+					desiredheight = desiredheight + height
+					remainingheight = remainingheight - height
+					spacingheight = self:getspacing()
+				end
+			end
+		end
+		spacingheight = 0
+		for _, control in ipairs(self:getcontrols() ) do
+			if control:getheight() == "*" then
+				control:measure(math.max(0, self:getdesiredwidth() ), math.max(0, remainingheight * 1 / proportionsheight - spacingheight) )
+				if control:getisvisible() then
+					local width = control:getdesiredwidth() + control:getmargin():gethorizontal()
+					local height = control:getdesiredheight() + control:getmargin():getvertical() + spacingheight
+					if width > desiredwidth then
+						desiredwidth = width
+					end
+					desiredheight = desiredheight + height
+					spacingheight = self:getspacing()
+				end
+			else			
+				if control:getisvisible() then
+					spacingheight = self:getspacing()
 				end
 			end
 		end
 	end
-	measure("width", availablewidth)
-	measure("height", availableheight)
+	if self:getwidth() == "auto" then
+		self.desiredwidth = desiredwidth
+	end
+	if self:getheight() == "auto" then
+		self.desiredheight = desiredheight
+	end
 end
 function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
 	self.screenx = screenx
@@ -143,16 +182,15 @@ function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight,
 	self.viewportx = viewportx
 	self.viewporty = viewporty
 	self.viewportwidth = viewportwidth
-	self.viewportheight = viewportheight
-	local offsetx = 0
-	local offsety = 0
-	for _, control in ipairs(self:getcontrols() ) do
-		if self:getorientation() == "horizontal" then
+	self.viewportheight = viewportheight		
+	if self:getorientation() == "horizontal" then
+		local offsetx = 0
+		for _, control in ipairs(self:getcontrols() ) do
 			local verticalalignment
 			if control:getverticaloptions() == "start" then
 				verticalalignment = 0
 			elseif control:getverticaloptions() == "center" then
-				verticalalignment = self:getdesiredheight() / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
+				verticalalignment = ( self:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) ) / 2
 			elseif control:getverticaloptions() == "end" then
 				verticalalignment = self:getdesiredheight() - (control:getdesiredheight() + control:getmargin():getvertical() ) 
 			end	
@@ -170,12 +208,15 @@ function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight,
 			if control:getisvisible() then
 				offsetx = offsetx + control:getdesiredwidth() + control:getmargin():gethorizontal() + self:getspacing()
 			end
-		else			
+		end
+	else			
+		local offsety = 0	
+		for _, control in ipairs(self:getcontrols() ) do
 			local horizontalalignment
 			if control:gethorizontaloptions() == "start" then
 				horizontalalignment = 0
 			elseif control:gethorizontaloptions() == "center" then
-				horizontalalignment = self:getdesiredwidth() / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
+				horizontalalignment = ( self:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) ) / 2
 			elseif control:gethorizontaloptions() == "end" then
 				horizontalalignment = self:getdesiredwidth() - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
 			end	

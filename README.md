@@ -1,8 +1,8 @@
 # LOVELi (LÖVE Layout & GUI)
 
 A [LÖVE 2D](https://love2d.org/) retained mode layout and GUI library.
-Includes StackLayout, AbsoluteLayout and Grid layouts.
-Includes Label, Button, ImageButton, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, Border, GraphicsView and ScrollView controls.
+Includes StackLayout, AbsoluteLayout, Grid and FlexLayout layouts.
+Includes Label, Button, ImageButton, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, MaskedTextBox, Border, GraphicsView and ScrollView controls.
 This library was inspired by .NET's MAUI controls.
 Tested on version 11.5.
 
@@ -100,6 +100,20 @@ local grid = loveli.Grid:new{ rowdefinitions = { "auto", "1*", "1*" }, columndef
   :with(1, 1, absolutelayout)
   :with(2, 2, stacklayout)
 local rootcontrol = grid
+```
+
+### FlexLayout
+
+FlexLayout is a layout that can arrange its children horizontally and vertically in a stack, and can also wrap its children if there are too many to fit in a single row or column. In addition, FlexLayout can control orientation and alignment, and adapt to different screen sizes.
+
+```lua
+local flexlayout = loveli.FlexLayout:new{ direction = "row", justifycontent = "spaceevenly", aligncontent = "center", width = 300, height = 100, verticaloptions = "center", horizontaloptions = "center", margin = loveli.Thickness.parse(10) }
+  :with(loveli.Button:new{ text = "Button 1", width = 75, height = 23 } )
+  :with(loveli.Button:new{ text = "Button 2", width = 75, height = 23, margin = loveli.Thickness.parse(10)  } )
+  :with(loveli.Button:new{ text = "Button 3", width = 75, height = 23, verticaloptions = "start" } )
+  :with(loveli.Button:new{ text = "Button 4", width = 75, height = 23 } )
+  :with(loveli.Button:new{ text = "Button 5", width = 75, height = 23 } )		
+local rootcontrol = flexlayout
 ```
 
 ## Controls
@@ -211,7 +225,13 @@ loveli.Slider:new{ value = 5, minimum = 0, maximum = 10, valuechanging = functio
 TextBox enables you to enter and edit a single, or multiple, lines of text.
 
 ```lua
-local textbox = loveli.TextBox:new{ text = "TextBox", ispassword = false, textchanging = function(sender, oldvalue, newvalue) return true end, textchanged = function(sender, oldtext, newtext) end }
+local textbox = loveli.TextBox:new{ text = "TextBox", ispassword = false, maxlength = 255, textchanging = function(sender, oldvalue, newvalue) return true end, textchanged = function(sender, oldtext, newtext) end }
+```
+
+### MaskedTextBox 
+
+```lua
+local maskedtextbox = loveli.MaskedTextBox:new{ mask = "(000) 000-0000", patterns = { ["0"] = { pattern = "%d" } }, textchanging = function(sender, oldvalue, newvalue) return true end, textchanged = function(sender, oldtext, newtext) end }
 ```
 
 ### Border

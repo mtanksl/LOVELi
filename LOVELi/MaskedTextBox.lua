@@ -20,25 +20,16 @@
 -- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 -- SOFTWARE.
 
-LOVELi.TextBox = {}
-LOVELi.TextBox.__index = LOVELi.TextBox
-setmetatable(LOVELi.TextBox, LOVELi.View)
-function LOVELi.TextBox:new(options) -- LOVELi.TextBox LOVELi.TextBox:new( { Action<LOVELi.TextBox sender, string oldvalue, string newvalue> textchanged, string text, bool ismultiline, bool ispassword, int maxlength, Font font, Union<"start", "center", "end"> horizontaltextalignment, Union<"start", "center", "end"> verticaltextalignment, LOVELi.Color textcolor, LOVELi.Color backgroundcolor, LOVELi.Color bordercolor, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+LOVELi.MaskedTextBox = {}
+LOVELi.MaskedTextBox.__index = LOVELi.MaskedTextBox
+setmetatable(LOVELi.MaskedTextBox, LOVELi.View)
+function LOVELi.MaskedTextBox:new(options) -- LOVELi.MaskedTextBox LOVELi.MaskedTextBox:new( { Action<LOVELi.MaskedTextBox sender, string oldvalue, string newvalue> textchanged, string text, string mask, Dictionary<string, object> patterns, Font font, Union<"start", "center", "end"> horizontaltextalignment, Union<"start", "center", "end"> verticaltextalignment, LOVELi.Color textcolor, LOVELi.Color backgroundcolor, LOVELi.Color bordercolor, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
 	o.textchanging = options.textchanging
 	o.textchanged = options.textchanged
 	o.text = LOVELi.Property.parse(options.text or "")
-	if options.ismultiline == nil then
-		o.ismultiline = LOVELi.Property.parse(false)
-	else
-		o.ismultiline = LOVELi.Property.parse(options.ismultiline)
-	end
-	if options.ispassword == nil then
-		o.ispassword = LOVELi.Property.parse(false)
-	else
-		o.ispassword = LOVELi.Property.parse(options.ispassword)
-	end
-	o.maxlength = LOVELi.Property.parse(options.maxlength or math.huge)
+	o.mask = LOVELi.Property.parse(options.mask or "")
+	o.patterns = LOVELi.Property.parse(options.patterns or {} )
 	o.font = LOVELi.Property.parse(options.font or love.graphics.getFont() )
 	o.horizontaltextalignment = LOVELi.Property.parse(options.horizontaltextalignment	or "start")
 	o.verticaltextalignment = LOVELi.Property.parse(options.verticaltextalignment or "center")
@@ -47,78 +38,72 @@ function LOVELi.TextBox:new(options) -- LOVELi.TextBox LOVELi.TextBox:new( { Act
 	o.bordercolor = LOVELi.Property.parse(options.bordercolor or LOVELi.Color.parse(0xC0C0C0FF) )
 	return o
 end
-function LOVELi.TextBox:gettextchanging()
+function LOVELi.MaskedTextBox:gettextchanging()
 	return self.textchanging
 end
-function LOVELi.TextBox:gettextchanged()
+function LOVELi.MaskedTextBox:gettextchanged()
 	return self.textchanged
 end
-function LOVELi.TextBox:gettext()
+function LOVELi.MaskedTextBox:gettext()
 	return self.text:getvalue()
 end
-function LOVELi.TextBox:settext(value)
+function LOVELi.MaskedTextBox:settext(value)
 	self.text:setvalue(value)
 end
-function LOVELi.TextBox:getismultiline()
-	return self.ismultiline:getvalue()
+function LOVELi.MaskedTextBox:getmask()
+	return self.mask:getvalue()
 end
-function LOVELi.TextBox:setismultiline(value)
-	self.ismultiline:setvalue(value)
+function LOVELi.MaskedTextBox:sermask(value)
+	self.mask:setvalue(value)
 end
-function LOVELi.TextBox:getispassword()
-	return self.ispassword:getvalue()
+function LOVELi.MaskedTextBox:getpatterns()
+	return self.patterns:getvalue()
 end
-function LOVELi.TextBox:setispassword(value)
-	self.ispassword:setvalue(value)
+function LOVELi.MaskedTextBox:setpatterns(value)
+	self.patterns:setvalue(value)
 end
-function LOVELi.TextBox:getmaxlength()
-	return self.maxlength:getvalue()
-end
-function LOVELi.TextBox:setmaxlength(value)
-	self.maxlength:setvalue(value)
-end
-function LOVELi.TextBox:getfont()
+function LOVELi.MaskedTextBox:getfont()
 	return self.font:getvalue()
 end
-function LOVELi.TextBox:setfont(value)
+function LOVELi.MaskedTextBox:setfont(value)
 	self.font:setvalue(value)
 end
-function LOVELi.TextBox:gethorizontaltextalignment()
+function LOVELi.MaskedTextBox:gethorizontaltextalignment()
 	return self.horizontaltextalignment:getvalue()
 end
-function LOVELi.TextBox:sethorizontaltextalignment(value)
+function LOVELi.MaskedTextBox:sethorizontaltextalignment(value)
 	self.horizontaltextalignment:setvalue(value)
 end
-function LOVELi.TextBox:getverticaltextalignment()
+function LOVELi.MaskedTextBox:getverticaltextalignment()
 	return self.verticaltextalignment:getvalue()
 end
-function LOVELi.TextBox:setverticaltextalignment(value)
+function LOVELi.MaskedTextBox:setverticaltextalignment(value)
 	self.verticaltextalignment:setvalue(value)
 end
-function LOVELi.TextBox:gettextcolor()
+function LOVELi.MaskedTextBox:gettextcolor()
 	return self.textcolor:getvalue()
 end
-function LOVELi.TextBox:settextcolor(value)
+function LOVELi.MaskedTextBox:settextcolor(value)
 	self.textcolor:setvalue(value)
 end
-function LOVELi.TextBox:getbackgroundcolor()
+function LOVELi.MaskedTextBox:getbackgroundcolor()
 	return self.backgroundcolor:getvalue()
 end
-function LOVELi.TextBox:setbackgroundcolor(value)
+function LOVELi.MaskedTextBox:setbackgroundcolor(value)
 	self.backgroundcolor:setvalue(value)
 end
-function LOVELi.TextBox:getbordercolor()
+function LOVELi.MaskedTextBox:getbordercolor()
 	return self.bordercolor:getvalue()
 end
-function LOVELi.TextBox:setbordercolor(value)
+function LOVELi.MaskedTextBox:setbordercolor(value)
 	self.bordercolor:setvalue(value)
 end
-function LOVELi.TextBox:getisfocusable() -- override
+function LOVELi.MaskedTextBox:getisfocusable() -- override
 	return true
 end
-function LOVELi.TextBox:init(layoutmanager) -- override
+function LOVELi.MaskedTextBox:init(layoutmanager) -- override
 	if self.layoutmanager then
-		error("TextBox's LayoutManager is already set.")
+		error("MaskedTextBox's LayoutManager is already set.")
 	end
 	self.layoutmanager = layoutmanager
 	local function ontextchange(oldvalue, newvalue)
@@ -133,17 +118,54 @@ function LOVELi.TextBox:init(layoutmanager) -- override
 	layoutmanager:subscribe("keypressed", self, function(key, scancode, isrepeat)
 		if key == "backspace" then
 			local oldvalue = self:gettext()			
-			if #oldvalue > 0 then
+			local mask = self:getmask()
+			if #oldvalue > 0 then			
 				local newvalue = string.sub(oldvalue, 1, -2)
+				while #newvalue > 0 do
+					local maskcharacter = string.sub(mask, #newvalue, #newvalue)
+					local pattern = nil
+					for key, options in pairs(self:getpatterns() ) do
+						if maskcharacter == key then
+							pattern = options.pattern
+							break
+						end
+					end
+					if pattern then
+						break
+					else
+						newvalue = string.sub(newvalue, 1, -2)
+					end
+				end
 				ontextchange(oldvalue, newvalue)
-			end
+			end			
 		end
 	end)
+	local function stringinsert(self, text, position)
+		return string.sub(self, 1, position - 1) .. text .. string.sub(self, position)
+	end
 	layoutmanager:subscribe("textinput", self, function(text)
-		local oldvalue = self:gettext()		
-		if #oldvalue < self:getmaxlength() then
+		local oldvalue = self:gettext()
+		local mask = self:getmask()
+		if #oldvalue < #mask then
 			local newvalue = oldvalue .. text
-			ontextchange(oldvalue, newvalue)
+			while #newvalue <= #mask do
+				local maskcharacter = string.sub(mask, #newvalue, #newvalue)
+				local pattern = nil
+				for key, options in pairs(self:getpatterns() ) do
+					if maskcharacter == key then
+						pattern = options.pattern
+						break
+					end
+				end
+				if pattern then
+					if string.find(text, pattern) then
+						ontextchange(oldvalue, newvalue)	
+					end
+					break
+				else
+					newvalue = stringinsert(newvalue, maskcharacter, #newvalue)
+				end				
+			end
 		end
 	end)
 	layoutmanager:subscribe("mousepressed", self, function(x, y, button, istouch, presses)
@@ -156,25 +178,25 @@ function LOVELi.TextBox:init(layoutmanager) -- override
 		love.keyboard.setTextInput(false)
 	end)
 end
-function LOVELi.TextBox:measure(availablewidth, availableheight) -- override
+function LOVELi.MaskedTextBox:measure(availablewidth, availableheight) -- override
 	self.availablewidth = availablewidth
 	self.availableheight = availableheight
 	if self:getwidth() == "*" then
 			self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then
-		self.desiredwidth = self:getfont():getWidth(self:gettext() ) + 10
+		self.desiredwidth = self:getfont():getWidth(self:getmask() ) + 10
 	else
 		self.desiredwidth = self:getwidth()
 	end
 	if self:getheight() == "*" then
-			self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
 	elseif self:getheight() == "auto" then
-		self.desiredheight = #select(2, self:getfont():getWrap(self:gettext(), self:getdesiredwidth() ) ) * self:getfont():getHeight() + 10
+		self.desiredheight = self:getfont():getHeight() + 10
 	else
 		self.desiredheight = self:getheight()
 	end
 end
-function LOVELi.TextBox:render(x, y) -- override
+function LOVELi.MaskedTextBox:render(x, y) -- override
 	if self:getlayoutmanager():getshowlayoutlines() then
 		if self:getmargin():gethorizontal() > 0 or self:getmargin():getvertical() > 0 then
 			love.graphics.setColor(1, 1, 0)
@@ -201,18 +223,26 @@ function LOVELi.TextBox:render(x, y) -- override
 		self:getdesiredwidth(), 
 		self:getdesiredheight() )
 	love.graphics.setColor(self:gettextcolor():getrgba() )
-	local text
-	if self:getispassword() then
-		text = string.gsub(self:gettext(), ".", "*")
-	else
-		text = self:gettext()
-	end
-	local wrappedtext
-	if self:getismultiline() then
-		_, wrappedtext = self:getfont():getWrap(text, self:getdesiredwidth() - 10)
-	else
-		wrappedtext = { text }
+	local text = self:gettext()
+	local mask = self:getmask()
+	if #text < #mask then
+		for i = #text + 1, #mask do
+			local maskcharacter = string.sub(mask, i, i)
+			local pattern = nil
+			for key, options in pairs(self:getpatterns() ) do
+				if maskcharacter == key then
+					pattern = options.pattern
+					break
+				end
+			end
+			if pattern then
+				text = text .. "_"
+			else
+				text = text .. maskcharacter
+			end
+		end
 	end	
+	local wrappedtext = { text }
 	for i, text in ipairs(wrappedtext) do
 		local horizontaltextalignment
 		if self:gethorizontaltextalignment() == "start" then
@@ -244,6 +274,6 @@ function LOVELi.TextBox:render(x, y) -- override
 		self:getdesiredwidth() - 1,
 		self:getdesiredheight() - 1)
 end
-function LOVELi.TextBox:type() -- override
-	return "TextBox"
+function LOVELi.MaskedTextBox:type() -- override
+	return "MaskedTextBox"
 end

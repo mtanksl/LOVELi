@@ -74,29 +74,22 @@ function LOVELi.Label:settextcolor(value)
 	self.textcolor:setvalue(value)
 end
 function LOVELi.Label:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth or self.availablewidth
-	self.availableheight = availableheight or self.availableheight
-	local function measure(dimension, availabledimension)
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		local function getfontdimension() if dimension == "width" then return self:getfont():getWidth(self:gettext() ) else return self:getfont():getHeight() end end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-			elseif getdimension() == "*" then
-				setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-			elseif getdimension() == "auto" then
-				setdesireddimension(getfontdimension() )
-			else
-				setdesireddimension(getdimension() )
-			end
-		end
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		self.desiredwidth = self:getfont():getWidth(self:gettext() )
+	else
+		self.desiredwidth = self:getwidth()
 	end
-	measure("width", availablewidth)
-	measure("height", availableheight)
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		self.desiredheight = #select(2, self:getfont():getWrap(self:gettext(), self:getdesiredwidth() ) ) * self:getfont():getHeight()
+	else
+		self.desiredheight = self:getheight()
+	end
 end
 function LOVELi.Label:render(x, y) -- override
 	if self:getlayoutmanager():getshowlayoutlines() then
@@ -117,7 +110,7 @@ function LOVELi.Label:render(x, y) -- override
 			self:getdesiredwidth(), 
 			self:getdesiredheight() )
 	end
-	love.graphics.setColor(self:gettextcolor():getred(), self:gettextcolor():getgreen(), self:gettextcolor():getblue(), self:gettextcolor():getalpha() )
+	love.graphics.setColor(self:gettextcolor():getrgba() )
 	local wrappedtext
 	if self:getismultiline() then
 		_, wrappedtext = self:getfont():getWrap(self:gettext(), self:getdesiredwidth() )
@@ -129,7 +122,7 @@ function LOVELi.Label:render(x, y) -- override
 		if self:gethorizontaltextalignment() == "start" then
 			horizontaltextalignment = 0
 		elseif self:gethorizontaltextalignment() == "center" then
-			horizontaltextalignment = self:getdesiredwidth() / 2 - self:getfont():getWidth(text) / 2
+			horizontaltextalignment = ( self:getdesiredwidth() - self:getfont():getWidth(text) ) / 2
 		elseif self:gethorizontaltextalignment() == "end" then
 			horizontaltextalignment = self:getdesiredwidth() - self:getfont():getWidth(text)
 		end
@@ -137,7 +130,7 @@ function LOVELi.Label:render(x, y) -- override
 		if self:getverticaltextalignment() == "start" then
 			verticaltextalignment = 0
 		elseif self:getverticaltextalignment() == "center" then
-			verticaltextalignment = self:getdesiredheight() / 2 - #wrappedtext * self:getfont():getHeight() / 2
+			verticaltextalignment = ( self:getdesiredheight() - #wrappedtext * self:getfont():getHeight() ) / 2
 		elseif self:getverticaltextalignment() == "end" then
 			verticaltextalignment = self:getdesiredheight() - #wrappedtext * self:getfont():getHeight()
 		end

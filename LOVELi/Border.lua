@@ -65,57 +65,44 @@ function LOVELi.Border:with(control)
 	return self
 end
 function LOVELi.Border:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth or self.availablewidth
-	self.availableheight = availableheight or self.availableheight
-	local function measure(dimension, availabledimension)	
-		local function getdimension() if dimension == "width" then return self:getwidth() else return self:getheight() end end
-		local function getmindimension() if dimension == "width" then return self:getminwidth() else return self:getminheight() end end
-		local function getmaxdimension() if dimension == "width" then return self:getmaxwidth() else return self:getmaxheight() end end
-		local function getdimensionmargin() if dimension == "width" then return self:getmargin():gethorizontal() else return self:getmargin():getvertical() end end
-		local function getdimensionpadding() if dimension == "width" then return self:getpadding():gethorizontal() else return self:getpadding():getvertical() end end
-		local function getdesireddimension() if dimension == "width" then return self:getdesiredwidth() else return self:getdesiredheight() end end
-		local function setdesireddimension(value) if dimension == "width" then self.desiredwidth = value else self.desiredheight = value end end
-		local function getcontroldimension(control) if dimension == "width" then return control:getwidth() else return control:getheight() end end
-		local function getcontroldimensionmargin(control) if dimension == "width" then return control:getmargin():gethorizontal() else return control:getmargin():getvertical() end end
-		local function getcontroldimensionrequest(control) if dimension == "width" then return control:getdesiredwidth() else return control:getdesiredheight() end end
-		local function getcontrolmeasure(control, value) if dimension == "width" then control:measure(value, nil) else control:measure(nil, value) end return getcontroldimensionrequest(control) + getcontroldimensionmargin(control) end
-		if availabledimension then
-			if availabledimension <= 0 or not self:getisvisible() then
-				setdesireddimension(0)
-				local control = self:getcontrol()
-				if control then
-					getcontrolmeasure(control, 0)
-				end
-			else
-				if getdimension() == "*" then
-					setdesireddimension(math.min(getmaxdimension(), math.max(getmindimension(), availabledimension - getdimensionmargin() ) ) )
-				elseif getdimension() == "auto" then
-					setdesireddimension(availabledimension - getdimensionmargin() )
-				else
-					setdesireddimension(getdimension() )
-				end
-				local maxdimension = 0
-				local control = self:getcontrol()
-				if control then
-					if getcontroldimension(control) == "*" and getdimension() == "auto" then
-						error("Can not use \"*\" " .. dimension .. " control inside an \"auto\" " .. dimension .. " Border.")
-					end
-					local controldimension = getcontrolmeasure(control, getdesireddimension() - getdimensionpadding() )
-					if controldimension > 0 and control:getisvisible() then
-						controldimension = controldimension + getdimensionpadding()
-						if controldimension > maxdimension then
-							maxdimension = controldimension
-						end
-					end
-				end
-				if getdimension() == "auto" then
-					setdesireddimension(maxdimension)
-				end
-			end
+	self.availablewidth = availablewidth
+	self.availableheight = availableheight
+	if self:getwidth() == "*" then
+		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
+	elseif self:getwidth() == "auto" then
+		self.desiredwidth = math.huge
+	else
+		self.desiredwidth = self:getwidth()
+	end
+	if self:getheight() == "*" then
+		self.desiredheight = math.min(self:getmaxheight(), math.max(self:getminheight(), availableheight - self:getmargin():getvertical() ) )
+	elseif self:getheight() == "auto" then
+		self.desiredheight = math.huge
+	else
+		self.desiredheight = self:getheight()
+	end
+	local desiredwidth = self:getpadding():gethorizontal()
+	local desiredheight = self:getpadding():getvertical()
+	local control = self:getcontrol()
+	if control then
+		if control:getwidth() == "*" and self:getwidth() == "auto" then
+			error("Can not use \"*\" width control inside an \"auto\" width Border.")
+		end
+		if control:getheight() == "*" and self:getheight() == "auto" then
+			error("Can not use \"*\" height control inside an \"auto\" height Border.")
+		end
+		control:measure(math.max(0, self:getdesiredwidth() - self:getpadding():gethorizontal() ), math.max(0, self:getdesiredheight() - self:getpadding():getvertical() ) )
+		if control:getisvisible() then
+			desiredwidth = control:getdesiredwidth() + control:getmargin():gethorizontal() + self:getpadding():gethorizontal()
+			desiredheight = control:getdesiredheight() + control:getmargin():getvertical() + self:getpadding():getvertical()
 		end
 	end
-	measure("width", availablewidth)
-	measure("height", availableheight)
+	if self:getwidth() == "auto" then
+		self.desiredwidth = desiredwidth
+	end
+	if self:getheight() == "auto" then
+		self.desiredheight = desiredheight
+	end	
 end
 function LOVELi.Border:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
 	self.screenx = screenx
@@ -132,7 +119,7 @@ function LOVELi.Border:arrange(screenx, screeny, screenwidth, screenheight, view
 		if control:gethorizontaloptions() == "start" then
 			horizontalalignment = 0
 		elseif control:gethorizontaloptions() == "center" then
-			horizontalalignment = (self:getdesiredwidth() - self:getpadding():gethorizontal() ) / 2 - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) / 2
+			horizontalalignment = ( (self:getdesiredwidth() - self:getpadding():gethorizontal() ) - (control:getdesiredwidth() + control:getmargin():gethorizontal() ) ) / 2
 		elseif control:gethorizontaloptions() == "end" then
 			horizontalalignment = (self:getdesiredwidth() - self:getpadding():gethorizontal() ) - (control:getdesiredwidth() + control:getmargin():gethorizontal() )
 		end
@@ -140,7 +127,7 @@ function LOVELi.Border:arrange(screenx, screeny, screenwidth, screenheight, view
 		if control:getverticaloptions() == "start" then
 			verticalalignment = 0
 		elseif control:getverticaloptions() == "center" then
-			verticalalignment = (self:getdesiredheight() - self:getpadding():getvertical() ) / 2 - (control:getdesiredheight() + control:getmargin():getvertical() ) / 2
+			verticalalignment = ( (self:getdesiredheight() - self:getpadding():getvertical() ) - (control:getdesiredheight() + control:getmargin():getvertical() ) ) / 2
 		elseif control:getverticaloptions() == "end" then
 			verticalalignment = (self:getdesiredheight() - self:getpadding():getvertical() ) - (control:getdesiredheight() + control:getmargin():getvertical() ) 
 		end
@@ -185,14 +172,14 @@ function LOVELi.Border:render(x, y) -- override
 				self:getdesiredheight() - self:getpadding():getvertical() )
 		end
 	end
-	love.graphics.setColor(self:getbackgroundcolor():getred(), self:getbackgroundcolor():getgreen(), self:getbackgroundcolor():getblue(), self:getbackgroundcolor():getalpha() )	
+	love.graphics.setColor(self:getbackgroundcolor():getrgba() )	
 	love.graphics.rectangle(
 		"fill", 
 		x + self:getmargin():getleft(), 
 		y + self:getmargin():gettop(), 
 		self:getdesiredwidth(), 
 		self:getdesiredheight() )
-	love.graphics.setColor(self:getbordercolor():getred(), self:getbordercolor():getgreen(), self:getbordercolor():getblue(), self:getbordercolor():getalpha() )
+	love.graphics.setColor(self:getbordercolor():getrgba() )
 	love.graphics.rectangle(
 		"line",
 		x + self:getmargin():getleft() + 0.5, 
