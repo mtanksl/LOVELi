@@ -10,6 +10,8 @@ Tested on version 11.5.
 
 ![Control](/controls.png)
 
+![Layout](/layouts.png)
+
 # Why?
 
 I needed a simple way for creating game menus and overlays. Since I did not find any simple - yet complete - library, I've written my own.
