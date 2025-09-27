@@ -109,12 +109,29 @@ function LOVELi.Slider:init(layoutmanager) -- override
 			end
 		end
 	end)
+	local pressed = false
 	layoutmanager:subscribe("mousepressed", self, function(x, y, button, istouch, presses)
+		pressed = true			
 		local thumbsize = self:getdesiredwidth() / (self:getmaximum() - self:getminimum() + 1)
 		local oldvalue = self:getvalue()		
-		local newvalue = math.floor(x / thumbsize)
-		if oldvalue ~= newvalue then
+		local newvalue = math.min(self:getmaximum(), math.max(self:getminimum(), math.floor( (x - (self:getscreenx() + self:getmargin():getleft() ) ) / thumbsize) ) )
+		if oldvalue ~= newvalue and newvalue >= self:getminimum() and newvalue <= self:getmaximum() then
 			onvaluechange(oldvalue, newvalue)
+		end
+	end)
+	layoutmanager:subscribe("mousemoved", self, function(x, y, button, istouch, presses)
+		if pressed then
+			local thumbsize = self:getdesiredwidth() / (self:getmaximum() - self:getminimum() + 1)
+			local oldvalue = self:getvalue()
+			local newvalue = math.min(self:getmaximum(), math.max(self:getminimum(), math.floor( (x - (self:getscreenx() + self:getmargin():getleft() ) ) / thumbsize) ) )
+			if oldvalue ~= newvalue then
+				onvaluechange(oldvalue, newvalue)
+			end
+		end
+	end)
+	layoutmanager:subscribe("mousereleased", self, function(x, y, button, istouch, presses)
+		if pressed then
+			pressed = false
 		end
 	end)
 	layoutmanager:subscribe("wheelmoved", self, function(x, y, dx, dy)

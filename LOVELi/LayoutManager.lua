@@ -286,7 +286,7 @@ function LOVELi.LayoutManager:mousepressed(x, y, button, istouch, presses)
 						local renderx = event.control:getrenderx()
 						local rendery = event.control:getrendery()
 						if x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight then
-							event.callback(x - renderx, y - rendery, button, istouch, presses)
+							event.callback(x, y, button, istouch, presses)
 							if event.control:getisfocusable() then
 								for j = 1, #controls do
 									if event.control == controls[j] then
@@ -341,7 +341,7 @@ function LOVELi.LayoutManager:mousemoved(x, y, dx, dy, istouch)
 						local rendery = event.control:getrendery()
 						if not (x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight) and
 							 (x - dx >= renderx and x - dx < renderx + renderwidth and y - dy >= rendery and y - dy < rendery + renderheight) then
-							event.callback(x - renderx, y - rendery, dx, dy, istouch)
+							event.callback(x, y, dx, dy, istouch)
 							break
 						end	
 					end
@@ -359,9 +359,37 @@ function LOVELi.LayoutManager:mousemoved(x, y, dx, dy, istouch)
 						local rendery = event.control:getrendery()
 						if (x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight) and 
 						   not (x - dx >= renderx and x - dx < renderx + renderwidth and y - dy >= rendery and y - dy < rendery + renderheight) then
-							event.callback(x - renderx, y - rendery, dx, dy, istouch)
+							event.callback(x, y, dx, dy, istouch)
 							break
 						end	
+					end
+				end
+			end
+		end
+		if self.focusedcontrol > 0 then
+			local events = self:geteventhandler("mousemoved")
+			if events then
+				local controls = self:getvisiblecontrols()
+				for _, event in ipairs(events) do
+					if event.control == controls[self.focusedcontrol] then
+						event.callback(x, y , dx, dy, istouch)
+						break
+					end
+				end
+			end
+		end
+	end
+end
+function LOVELi.LayoutManager:mousereleased(x, y, button, istouch, presses)
+	if self:getisenabled() then
+		if self.focusedcontrol > 0 then
+			local events = self:geteventhandler("mousereleased")
+			if events then
+				local controls = self:getvisiblecontrols()
+				for _, event in ipairs(events) do
+					if event.control == controls[self.focusedcontrol] then
+						event.callback(x, y, dx, dy, istouch)
+						break
 					end
 				end
 			end
@@ -382,9 +410,9 @@ function LOVELi.LayoutManager:wheelmoved(dx, dy)
 						local rendery = event.control:getrendery()
 						if x >= renderx and x < renderx + renderwidth and y >= rendery and y < rendery + renderheight then
 							if love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift") then						
-								event.callback(x - renderx, y - rendery, dy, dx)
+								event.callback(x, y, dy, dx)
 							else
-								event.callback(x - renderx, y - rendery, dx, dy)
+								event.callback(x, y, dx, dy)
 							end							
 							break
 						end	

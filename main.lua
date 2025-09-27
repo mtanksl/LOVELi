@@ -23,6 +23,9 @@
 -- Uncomment to see Controls example:
 dofile("examples/controls.lua")
 
+-- Uncomment to see Layouts example:
+--dofile("examples/layouts.lua")
+
 -- Uncomment to see Menu example:
 --dofile("examples/menu.lua")
 

@@ -108,6 +108,9 @@ end
 function love.mousepressed(x, y, button, istouch, presses)
 	layoutmanager:mousepressed(x, y, button, istouch, presses)
 end
+function love.mousereleased(x, y, button, istouch, presses)
+	layoutmanager:mousereleased(x, y, button, istouch, presses)
+end
 function love.mousemoved(x, y, dx, dy, istouch)
   layoutmanager:mousemoved(x, y, dx, dy, istouch)
 end
