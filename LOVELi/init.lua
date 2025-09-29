@@ -43,6 +43,7 @@ local classes = {
 	"Slider",
 	"TextBox",
 	"MaskedTextBox",
+	"Picker",
 	"Border",
 	-- Layout
 	"ContentView",

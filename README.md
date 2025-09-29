@@ -2,7 +2,7 @@
 
 A [LÖVE 2D](https://love2d.org/) retained mode layout and GUI library.
 Includes StackLayout, AbsoluteLayout, Grid and FlexLayout layouts.
-Includes Label, Button, ImageButton, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, MaskedTextBox, Border, GraphicsView and ScrollView controls.
+Includes Label, Button, ImageButton, Image, CheckBox, RadioButton, Switch, ProgressBar, Slider, TextBox, MaskedTextBox, Picker, Border, GraphicsView and ScrollView controls.
 This library was inspired by .NET's MAUI controls.
 Tested on version 11.5.
 
@@ -237,6 +237,14 @@ local textbox = loveli.TextBox:new{ text = "TextBox", ispassword = false, maxlen
 
 ```lua
 local maskedtextbox = loveli.MaskedTextBox:new{ mask = "(000) 000-0000", patterns = { ["0"] = { pattern = "%d" } }, textchanging = function(sender, oldvalue, newvalue) return true end, textchanged = function(sender, oldtext, newtext) end }
+```
+
+### Picker 
+
+Picker displays a short list of items, from which the user can select an item.
+
+```lua
+local picker = loveli.Picker:new{ selectedindexchanged = function(sender, oldindex, newindex) print(oldindex, newindex) end, itemssource = { "Option 1", "Option 2", "Option 3", "Option 4", { tostring = function(self) return "Option 5" end } }, text = "Select...", width = 100, height = "auto" } )
 ```
 
 ### Border

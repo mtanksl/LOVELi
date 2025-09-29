@@ -1,4 +1,5 @@
 ﻿/.svn
 /.vs
+/examples/dev.lua
 /tests
 /icon.pdn

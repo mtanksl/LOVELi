@@ -22,7 +22,7 @@
 
 LOVELi.View = {}
 LOVELi.View.__index = LOVELi.View
-function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, int zindex, string name, bool isvisible, bool isenabled } options)
 	local o = {
 		x = LOVELi.Property.parse(options.x or 0),
 		y = LOVELi.Property.parse(options.y or 0),
@@ -34,7 +34,8 @@ function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y
 		maxheight = LOVELi.Property.parse(options.maxheight or math.huge),
 		margin = LOVELi.Property.parse(options.margin or LOVELi.Thickness.parse(0) ),
 		horizontaloptions = LOVELi.Property.parse(options.horizontaloptions or "start"),
-		verticaloptions = LOVELi.Property.parse(options.verticaloptions or "start"),		
+		verticaloptions = LOVELi.Property.parse(options.verticaloptions or "start"),	
+		zindex = LOVELi.Property.parse(options.zindex or 0),
 		name = LOVELi.Property.parse(options.name),
 		layoutmanager = nil,
 		parent = nil,
@@ -132,6 +133,12 @@ function LOVELi.View:getverticaloptions()
 end
 function LOVELi.View:setverticaloptions(value)
 	self.verticaloptions:setvalue(value)
+end
+function LOVELi.View:getzindex()
+	return self.zindex:getvalue()
+end
+function LOVELi.View:setzindex(value)
+	self.zindex:setvalue(value)
 end
 function LOVELi.View:getname()
 	return self.name:getvalue()
