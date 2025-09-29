@@ -227,7 +227,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 					if j < 1 then
 						j = j + #controls
 					end
-					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getisfocusable() then
+					if controls[j]:getisfocusable() and self:getvisualtreeisvisible(controls[j] ) and self:getvisualtreeisenabled(controls[j] ) then
 						newfocusedcontrol = controls[j]
 						break
 					end
@@ -246,7 +246,7 @@ function LOVELi.LayoutManager:keypressed(key, scancode, isrepeat)
 					if j > #controls then
 						j = j - #controls
 					end
-					if controls[j]:getisvisible() and controls[j]:getisenabled() and controls[j]:getisfocusable() then
+					if controls[j]:getisfocusable() and self:getvisualtreeisvisible(controls[j] ) and self:getvisualtreeisenabled(controls[j] ) then
 						newfocusedcontrol = controls[j]
 						break
 					end
