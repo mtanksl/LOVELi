@@ -115,12 +115,12 @@ function LOVELi.MaskedTextBox:init(layoutmanager) -- override
 			end
 		end
 	end
-	layoutmanager:subscribe("keypressed", self, function(key, scancode, isrepeat)
+	layoutmanager:subscribe("keypressed", self, function(key, scancode, isrepeat) --TODO: Support UTF-8 text and mask
 		if key == "backspace" then
 			local oldvalue = self:gettext()			
 			local mask = self:getmask()
 			if #oldvalue > 0 then			
-				local newvalue = string.sub(oldvalue, 1, -2)
+				local newvalue = string.sub(oldvalue, 1, -2) 
 				while #newvalue > 0 do
 					local maskcharacter = string.sub(mask, #newvalue, #newvalue)
 					local pattern = nil
@@ -143,7 +143,7 @@ function LOVELi.MaskedTextBox:init(layoutmanager) -- override
 	local function stringinsert(self, text, position)
 		return string.sub(self, 1, position - 1) .. text .. string.sub(self, position)
 	end
-	layoutmanager:subscribe("textinput", self, function(text)
+	layoutmanager:subscribe("textinput", self, function(text) --TODO: Support UTF-8 text and mask
 		local oldvalue = self:gettext()
 		local mask = self:getmask()
 		if #oldvalue < #mask then

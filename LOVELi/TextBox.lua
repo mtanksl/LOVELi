@@ -134,7 +134,9 @@ function LOVELi.TextBox:init(layoutmanager) -- override
 		if key == "backspace" then
 			local oldvalue = self:gettext()			
 			if #oldvalue > 0 then
-				local newvalue = string.sub(oldvalue, 1, -2)
+				local utf8 = require("utf8")
+				local byteoffset = utf8.offset(oldvalue, -1)
+				local newvalue = string.sub(oldvalue, 1, byteoffset - 1)
 				ontextchange(oldvalue, newvalue)
 			end
 		end
