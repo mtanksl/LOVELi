@@ -21,7 +21,7 @@
 -- SOFTWARE.
 
 local loveli = require("LOVELi")
-dofile("Loveli/CustomControls/AnimatedLabel.lua")
+dofile("LOVELi/CustomControls/AnimatedLabel.lua")
 function love.load(arg)
 	enabledebugger(arg)	
 	layoutmanager = loveli.LayoutManager:new{}
