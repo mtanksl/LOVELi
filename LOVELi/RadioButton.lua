@@ -114,9 +114,7 @@ function LOVELi.RadioButton:init(layoutmanager) -- override
 	end)
 	table.insert(LOVELi.RadioButton.radiobuttons, self)
 end
-function LOVELi.RadioButton:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.RadioButton:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

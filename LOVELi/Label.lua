@@ -73,9 +73,7 @@ end
 function LOVELi.Label:settextcolor(value)
 	self.textcolor:setvalue(value)
 end
-function LOVELi.Label:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.Label:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

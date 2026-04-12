@@ -91,9 +91,7 @@ function LOVELi.CheckBox:init(layoutmanager) -- override
 		oncheckedchanged()
 	end)
 end
-function LOVELi.CheckBox:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.CheckBox:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

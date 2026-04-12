@@ -150,9 +150,7 @@ function LOVELi.Slider:init(layoutmanager) -- override
 		end
 	end)
 end
-function LOVELi.Slider:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.Slider:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

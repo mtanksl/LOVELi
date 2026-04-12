@@ -23,13 +23,28 @@
 LOVELi.GraphicsView = {}
 LOVELi.GraphicsView.__index = LOVELi.GraphicsView
 setmetatable(LOVELi.GraphicsView, LOVELi.View)
-function LOVELi.GraphicsView:new(options) -- LOVELi.GraphicsView LOVELi.GraphicsView:new( { Action<GraphicsView sender, int x, int y, int width, int height> drawable, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
+function LOVELi.GraphicsView:new(options) -- LOVELi.GraphicsView LOVELi.GraphicsView:new( { Action<LOVELi.Button sender, int x, int y> clicked, Action<GraphicsView sender, int x, int y> drawable, int x, int y, Union<"*", "auto", int> width, Union<"*", "auto", int> height, int minwidth, int maxwidth, int minheight, int maxheight, LOVELi.Thickness margin, Union<"start", "center", "end"> horizontaloptions, Union<"start", "center", "end"> verticaloptions, string name, bool isvisible, bool isenabled } options)
 	local o = LOVELi.View.new(self, options)
+	o.clicked = options.clicked
 	o.drawable = options.drawable
 	return o
 end
+function LOVELi.GraphicsView:getclicked()
+	return self.onclicked
+end
 function LOVELi.GraphicsView:getdrawable()
 	return self.drawable
+end
+function LOVELi.GraphicsView:init(layoutmanager) -- override
+	if self.layoutmanager then
+		error("GraphicsView's LayoutManager is already set.")
+	end
+	self.layoutmanager = layoutmanager
+	layoutmanager:subscribe("mousepressed", self, function(x, y, button, istouch, presses)
+		if self.clicked then
+			self:clicked(x, y)
+		end
+	end)
 end
 function LOVELi.GraphicsView:render(x, y) -- override
 	if self:getlayoutmanager():getshowlayoutlines() then
@@ -51,7 +66,7 @@ function LOVELi.GraphicsView:render(x, y) -- override
 			self:getdesiredheight() )
 	end
 	if self.drawable then
-		self:drawable(x + self:getmargin():getleft(), y + self:getmargin():gettop(), self:getdesiredwidth(), self:getdesiredheight() )
+		self:drawable(x + self:getmargin():getleft(), y + self:getmargin():gettop() )
 	end
 end
 function LOVELi.GraphicsView:type() -- override

@@ -45,9 +45,7 @@ end
 function LOVELi.Image:setaspect(value)
 	self.aspect:setvalue(value)
 end
-function LOVELi.Image:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.Image:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

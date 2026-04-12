@@ -168,9 +168,7 @@ function LOVELi.Picker:init(layoutmanager) -- override
 		toggledropdownmenu()
 	end)
 end
-function LOVELi.Picker:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.Picker:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then
@@ -190,15 +188,7 @@ function LOVELi.Picker:measure(availablewidth, availableheight) -- override
 		dropdownmenu:measure(self:getdesiredwidth(), 100)
 	end	
 end
-function LOVELi.Picker:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override	
-	self.screenx = screenx
-	self.screeny = screeny
-	self.screenwidth = screenwidth
-	self.screenheight = screenheight
-	self.viewportx = viewportx
-	self.viewporty = viewporty
-	self.viewportwidth = viewportwidth
-	self.viewportheight = viewportheight	
+function LOVELi.Picker:arrangeoverride(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override		
 	local dropdownmenu = self:getdropdownmenu()
 	if dropdownmenu then
 		screenx = screenx + self:getmargin():getleft() + self:getx()

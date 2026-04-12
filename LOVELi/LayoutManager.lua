@@ -33,7 +33,6 @@ function LOVELi.LayoutManager:new(options) -- LOVELi.LayoutManager LOVELi.Layout
 		eventhandlers = {},
 		focusedcontrol = nil,
 		initialized = false, -- private
-		invalid = true, -- private
 		alpha = 0, -- private
 		minimumalpha = 0.25, -- private
 		maximumalpha = 0.75, -- private
@@ -98,45 +97,51 @@ function LOVELi.LayoutManager:getrootcontrol()
 	return self.rootcontrol
 end
 function LOVELi.LayoutManager:getcontrols(rootcontrol)
+	rootcontrol = rootcontrol or self:getrootcontrol()
 	local controls = {}
-	local visit = {}	
-	table.insert(visit, rootcontrol or self:getrootcontrol() )
-	while #visit > 0 do
-		local parent = table.remove(visit)
-		table.insert(controls, parent)
-		local t = parent:getcontrols()
-		for i = #t, 1, -1 do
-			table.insert(visit, t[i] )
+	if rootcontrol then
+		local visit = {}	
+		table.insert(visit, rootcontrol)
+		while #visit > 0 do
+			local parent = table.remove(visit)
+			table.insert(controls, parent)
+			local t = parent:getcontrols()
+			for i = #t, 1, -1 do
+				table.insert(visit, t[i] )
+			end
 		end
 	end
 	return controls
 end
 function LOVELi.LayoutManager:getvisiblecontrols(rootcontrol, zindex) 
+	rootcontrol = rootcontrol or self:getrootcontrol()
 	local controls = {}
-	local visit = {}	
-	table.insert(visit, rootcontrol or self:getrootcontrol() )
-	while #visit > 0 do
-		local parent = table.remove(visit)
-		if parent:getisvisible() then
-			table.insert(controls, parent)
-			local t = parent:getcontrols()
-			for i = #t, 1, -1 do
-				table.insert(visit, t[i] )
-			end			
-		end
-	end
-	if zindex then
-		for i, control in ipairs(controls) do
-			controls[i] = { index = i, zindex = control:getzindex(), control = control }
-		end
-		table.sort(controls, function(a, b)
-			if a.zindex == b.zindex then
-				return a.index < b.index
+	if rootcontrol then
+		local visit = {}	
+		table.insert(visit, rootcontrol)
+		while #visit > 0 do
+			local parent = table.remove(visit)
+			if parent:getisvisible() then
+				table.insert(controls, parent)
+				local t = parent:getcontrols()
+				for i = #t, 1, -1 do
+					table.insert(visit, t[i] )
+				end			
 			end
-			return a.zindex < b.zindex
-		end)
-		for i, item in ipairs(controls) do
-			controls[i] = item.control
+		end
+		if zindex then
+			for i, control in ipairs(controls) do
+				controls[i] = { index = i, zindex = control:getzindex(), control = control }
+			end
+			table.sort(controls, function(a, b)
+				if a.zindex == b.zindex then
+					return a.index < b.index
+				end
+				return a.zindex < b.zindex
+			end)
+			for i, item in ipairs(controls) do
+				controls[i] = item.control
+			end
 		end
 	end
 	return controls
@@ -170,7 +175,8 @@ function LOVELi.LayoutManager:getfocusedcontrol()
 	return self.focusedcontrol
 end
 function LOVELi.LayoutManager:invalidate()
-	self.invalid = true
+	self.rootcontrol:invalidatemeasure()
+	self.rootcontrol:invalidatearrange()
 	self.rootcontrol:invalidate()
 end
 function LOVELi.LayoutManager:with(rootcontrol)
@@ -486,56 +492,82 @@ function LOVELi.LayoutManager:update(dt)
 	if self:getisvisible() then
 		self:init()
 		self.alpha = ( (self.maximumalpha + self.minimumalpha) + (self.maximumalpha - self.minimumalpha) * math.sin(2 * math.pi / self.interval * love.timer.getTime() ) ) / 2
-		for _, control in ipairs(self:getvisiblecontrols() ) do
-			control:update(dt)
+		local rootcontrol = self:getrootcontrol()
+		if rootcontrol then
+			for _, control in ipairs(self:getvisiblecontrols(rootcontrol) ) do
+				control:update(dt)
+			end
 		end
 	end
 end
 function LOVELi.LayoutManager:draw()
 	if self:getisvisible() then	
-		self:init()
-		if self.invalid then
-			self.invalid = false
-			local screenx = self:getx()
-			local screeny = self:gety()
-			local screenwidth = self:getwidth()
-			local screenheight = self:getheight()
-			local viewportx = 0
-			local viewporty = 0
-			local viewportwidth = love.graphics:getWidth()
-			local viewportheight = love.graphics:getHeight()
-			local control = self:getrootcontrol()
-			control:measure(screenwidth, screenheight)
-			control:arrange(
-				screenx + control:getx(),
-				screeny + control:gety(),
-				control:getdesiredwidth() + control:getmargin():gethorizontal(),
-				control:getdesiredheight() + control:getmargin():getvertical(),
-				
-				LOVELi.Math.clipx(viewportx, screenx),
-				LOVELi.Math.clipy(viewporty, screeny),
-				LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx, screenwidth),
-				LOVELi.Math.clipheight(viewporty, viewportheight, screeny, screenheight)
-			)
-		end
-		local controls = self:getvisiblecontrols(nil, true)
-		for _, control in ipairs(controls) do
-			control:draw()
-		end
-		local mode, alphamode = love.graphics.getBlendMode()
-		love.graphics.setBlendMode("alpha", "premultiplied")
-		for _, control in ipairs(controls) do
-			local canvas = control:getcanvas()
-			if canvas then
-				if self.focusedcontrol == control then
-					love.graphics.setColor(self.alpha, self.alpha, self.alpha, self.alpha)
+		self:init()		
+		local rootcontrol = self:getrootcontrol()
+		if rootcontrol then
+			for _, control in ipairs(self:getcontrols(rootcontrol) ) do
+				if control == rootcontrol then
+					if control:getisinvalidmeasure() or control:getisinvalidarrange() then
+						local screenx = self:getx()
+						local screeny = self:gety()
+						local screenwidth = self:getwidth()
+						local screenheight = self:getheight()
+						local viewportx = 0
+						local viewporty = 0
+						local viewportwidth = love.graphics:getWidth()
+						local viewportheight = love.graphics:getHeight()
+						control:measure(screenwidth, screenheight)
+						control:arrange(
+							screenx + control:getx(),
+							screeny + control:gety(),
+							control:getdesiredwidth() + control:getmargin():gethorizontal(),
+							control:getdesiredheight() + control:getmargin():getvertical(),			
+							
+							LOVELi.Math.clipx(viewportx, screenx),
+							LOVELi.Math.clipy(viewporty, screeny),
+							LOVELi.Math.clipwidth(viewportx, viewportwidth, screenx, screenwidth),
+							LOVELi.Math.clipheight(viewporty, viewportheight, screeny, screenheight)
+						)
+					end
 				else
-					love.graphics.setColor(1, 1, 1, 1)
+					if control:getisinvalidmeasure() then
+						control:measure(control:getavailablewidth(), control:getavailableheight() )
+					end
+					if control:getisinvalidarrange() then
+						control:arrange(
+							control:getscreenx(),
+							control:getscreeny(), 
+							control:getscreenwidth(), 
+							control:getscreenheight(), 
+							
+							control:getviewportx(),
+							control:getviewporty(), 
+							control:getviewportwidth(), 
+							control:getviewportheight() )
+					end
 				end
-				love.graphics.draw(canvas, math.floor(control:getrenderx() ), math.floor(control:getrendery() ) ) -- Snap to grid
 			end
+			local controls = self:getvisiblecontrols(rootcontrol, true)
+			for _, control in ipairs(controls) do
+				if control:getisinvalid() then
+					control:draw() 
+				end
+			end
+			local mode, alphamode = love.graphics.getBlendMode()
+			love.graphics.setBlendMode("alpha", "premultiplied")
+			for _, control in ipairs(controls) do
+				local canvas = control:getcanvas()
+				if canvas then
+					if self.focusedcontrol == control then
+						love.graphics.setColor(self.alpha, self.alpha, self.alpha, self.alpha)
+					else
+						love.graphics.setColor(1, 1, 1, 1)
+					end
+					love.graphics.draw(canvas, math.floor(control:getrenderx() ), math.floor(control:getrendery() ) ) -- Snap to grid
+				end
+			end
+			love.graphics.setBlendMode(mode, alphamode)
 		end
-		love.graphics.setBlendMode(mode, alphamode)
 	end
 end
 function LOVELi.LayoutManager:type()

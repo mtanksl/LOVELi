@@ -57,9 +57,7 @@ function LOVELi.FlexLayout:with(control)
 	table.insert(self.controls, control)
 	return self
 end
-function LOVELi.FlexLayout:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.FlexLayout:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then
@@ -251,15 +249,7 @@ function LOVELi.FlexLayout:measure(availablewidth, availableheight) -- override
 		self.desiredheight = desiredheight
 	end
 end
-function LOVELi.FlexLayout:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
-	self.screenx = screenx
-	self.screeny = screeny
-	self.screenwidth = screenwidth
-	self.screenheight = screenheight
-	self.viewportx = viewportx
-	self.viewporty = viewporty
-	self.viewportwidth = viewportwidth
-	self.viewportheight = viewportheight
+function LOVELi.FlexLayout:arrangeoverride(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
 	if self:getdirection() == "row" then
 		local offsetx = 0
 		local offsety = 0

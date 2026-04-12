@@ -49,9 +49,7 @@ function LOVELi.StackLayout:with(control)
 	table.insert(self.controls, control)
 	return self
 end
-function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.StackLayout:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then
@@ -174,15 +172,7 @@ function LOVELi.StackLayout:measure(availablewidth, availableheight) -- override
 		self.desiredheight = desiredheight
 	end
 end
-function LOVELi.StackLayout:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
-	self.screenx = screenx
-	self.screeny = screeny
-	self.screenwidth = screenwidth
-	self.screenheight = screenheight
-	self.viewportx = viewportx
-	self.viewporty = viewporty
-	self.viewportwidth = viewportwidth
-	self.viewportheight = viewportheight		
+function LOVELi.StackLayout:arrangeoverride(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
 	if self:getorientation() == "horizontal" then
 		local offsetx = 0
 		for _, control in ipairs(self:getcontrols() ) do

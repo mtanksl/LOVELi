@@ -55,9 +55,7 @@ end
 function LOVELi.ProgressBar:setbordercolor(value)
 	self.bordercolor:setvalue(value)
 end
-function LOVELi.ProgressBar:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.ProgressBar:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

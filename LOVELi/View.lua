@@ -53,7 +53,9 @@ function LOVELi.View:new(options) -- LOVELi.View LOVELi.View:new( { int x, int y
 		viewportwidth = nil,
 		viewportheight = nil,
 		canvas = nil,
-		invalid = true -- private
+		isinvalidmeasure = true,
+		isinvalidarrange = true, 
+		isinvalid = true
 	}	
 	if options.isvisible == nil then
 		o.isvisible = LOVELi.Property.parse(true)
@@ -218,16 +220,29 @@ end
 function LOVELi.View:getcanvas()
 	return self.canvas
 end
---TODO: Do not use
-function LOVELi.View:invalidatemeasure() 
-	self:measure(self.availablewidth, self.availableheight)
+function LOVELi.View:getisinvalidmeasure()
+	return self.isinvalidmeasure
 end
---TODO: Do not use
+function LOVELi.View:getisinvalidarrange()
+	return self.isinvalidarrange
+end
+function LOVELi.View:getisinvalid()
+	return self.isinvalid
+end
+function LOVELi.View:invalidatemeasure() 
+	self.isinvalidmeasure = true
+	for _, control in ipairs(self:getcontrols() ) do
+		control:invalidatemeasure()
+	end
+end
 function LOVELi.View:invalidatearrange() 
-	self:arrange(self.screenx, self.screeny, self.screenwidth, self.screenheight, self.viewportx, self.viewporty, self.viewportwidth, self.viewportheight)
+	self.isinvalidarrange = true
+	for _, control in ipairs(self:getcontrols() ) do
+		control:invalidatearrange()
+	end
 end
 function LOVELi.View:invalidate()
-	self.invalid = true
+	self.isinvalid = true
 	for _, control in ipairs(self:getcontrols() ) do
 		control:invalidate()
 	end
@@ -241,9 +256,17 @@ function LOVELi.View:init(layoutmanager) -- virtual
 	end
 	self.layoutmanager = layoutmanager
 end
-function LOVELi.View:measure(availablewidth, availableheight) -- virtual
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.View:update(dt) -- virtual
+end
+function LOVELi.View:measure(availablewidth, availableheight)
+	if self.isinvalidmeasure then
+		self.isinvalidmeasure = false
+		self.availablewidth = availablewidth
+		self.availableheight = availableheight
+		self:measureoverride(availablewidth, availableheight)
+	end
+end
+function LOVELi.View:measureoverride(availablewidth, availableheight) -- virtual
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then
@@ -259,21 +282,25 @@ function LOVELi.View:measure(availablewidth, availableheight) -- virtual
 		self.desiredheight = self:getheight()
 	end
 end
-function LOVELi.View:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- virtual
-	self.screenx = screenx
-	self.screeny = screeny
-	self.screenwidth = screenwidth
-	self.screenheight = screenheight
-	self.viewportx = viewportx
-	self.viewporty = viewporty
-	self.viewportwidth = viewportwidth
-	self.viewportheight = viewportheight
+function LOVELi.View:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight)
+	if self.isinvalidarrange then
+		self.isinvalidarrange = false
+		self.screenx = screenx
+		self.screeny = screeny
+		self.screenwidth = screenwidth
+		self.screenheight = screenheight
+		self.viewportx = viewportx
+		self.viewporty = viewporty
+		self.viewportwidth = viewportwidth
+		self.viewportheight = viewportheight
+		self:arrangeoverride(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight)
+	end
 end
-function LOVELi.View:update(dt) -- virtual
+function LOVELi.View:arrangeoverride(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- virtual
 end
 function LOVELi.View:draw() 
-	if self.invalid then
-		self.invalid = false
+	if self.isinvalid then
+		self.isinvalid = false
 		local width = self:getrenderwidth()
 		local height = self:getrenderheight()
 		if width > 0 and height > 0 then

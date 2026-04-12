@@ -33,7 +33,9 @@ function love.load(arg)
 		:with(loveli.AbsoluteLayout:new{ width = "*", height = "*", margin = loveli.Thickness.parse(10) }
 			:with(loveli.StackLayout:new{ orientation = "vertical", spacing = 10, x = 0, y = 0, width = "auto", height = "auto", horizontaloptions = "start", verticaloptions = "start" }
 				:with(label)
-				:with(loveli.GraphicsView:new{ drawable = function(sender, x, y, width, height) 
+				:with(loveli.GraphicsView:new{ drawable = function(sender, x, y) 
+					local width = sender:getscreenwidth() - sender:getmargin():gethorizontal()
+					local height = sender:getscreenheight() - sender:getmargin():getvertical()
 					love.graphics.setColor(darkgreencolor:getvalue():getrgba() ) 
 					love.graphics.circle("fill", width / 2, height / 2, width / 2, height / 2) 
 				end, width = 80, height = 80 } )

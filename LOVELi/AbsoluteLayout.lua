@@ -35,9 +35,7 @@ function LOVELi.AbsoluteLayout:with(control)
 	table.insert(self.controls, control)
 	return self
 end
-function LOVELi.AbsoluteLayout:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.AbsoluteLayout:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then
@@ -80,15 +78,7 @@ function LOVELi.AbsoluteLayout:measure(availablewidth, availableheight) -- overr
 		self.desiredheight = desiredheight
 	end
 end
-function LOVELi.AbsoluteLayout:arrange(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
-	self.screenx = screenx
-	self.screeny = screeny
-	self.screenwidth = screenwidth
-	self.screenheight = screenheight
-	self.viewportx = viewportx
-	self.viewporty = viewporty
-	self.viewportwidth = viewportwidth
-	self.viewportheight = viewportheight
+function LOVELi.AbsoluteLayout:arrangeoverride(screenx, screeny, screenwidth, screenheight, viewportx, viewporty, viewportwidth, viewportheight) -- override
 	for _, control in ipairs(self:getcontrols() ) do
 		local horizontalalignment = 0	
 		if control:gethorizontaloptions() == "start" then

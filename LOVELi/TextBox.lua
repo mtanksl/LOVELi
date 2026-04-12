@@ -158,9 +158,7 @@ function LOVELi.TextBox:init(layoutmanager) -- override
 		love.keyboard.setTextInput(false)
 	end)
 end
-function LOVELi.TextBox:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.TextBox:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 			self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

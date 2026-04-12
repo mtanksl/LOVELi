@@ -71,9 +71,7 @@ function LOVELi.ImageButton:init(layoutmanager) -- override
 		onclicked()
 	end)
 end
-function LOVELi.ImageButton:measure(availablewidth, availableheight) -- override
-	self.availablewidth = availablewidth
-	self.availableheight = availableheight
+function LOVELi.ImageButton:measureoverride(availablewidth, availableheight) -- override
 	if self:getwidth() == "*" then
 		self.desiredwidth = math.min(self:getmaxwidth(), math.max(self:getminwidth(), availablewidth - self:getmargin():gethorizontal() ) )
 	elseif self:getwidth() == "auto" then

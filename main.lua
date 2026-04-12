@@ -37,3 +37,6 @@ dofile("examples/controls.lua")
 
 -- Uncomment to see Custom Control example:
 --dofile("examples/customcontrol.lua")
+
+-- Uncomment to see a simple Tic-Tac-Toe game example:
+--dofile("examples/tictactoe.lua")
