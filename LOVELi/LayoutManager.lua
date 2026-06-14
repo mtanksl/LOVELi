@@ -549,7 +549,7 @@ function LOVELi.LayoutManager:draw()
 			end
 			local controls = self:getvisiblecontrols(rootcontrol, true)
 			for _, control in ipairs(controls) do
-				if control:getisinvalid() then
+				if control:getisinvalid() then	
 					control:draw() 
 				end
 			end
@@ -557,7 +557,7 @@ function LOVELi.LayoutManager:draw()
 			love.graphics.setBlendMode("alpha", "premultiplied")
 			for _, control in ipairs(controls) do
 				local canvas = control:getcanvas()
-				if canvas then
+				if canvas then					
 					if self.focusedcontrol == control then
 						love.graphics.setColor(self.alpha, self.alpha, self.alpha, self.alpha)
 					else
@@ -566,6 +566,7 @@ function LOVELi.LayoutManager:draw()
 					love.graphics.draw(canvas, math.floor(control:getrenderx() ), math.floor(control:getrendery() ) ) -- Snap to grid
 				end
 			end
+			love.graphics.setColor(1, 1, 1, 1)
 			love.graphics.setBlendMode(mode, alphamode)
 		end
 	end

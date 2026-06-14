@@ -309,10 +309,11 @@ function LOVELi.View:draw()
 				canvas = love.graphics.newCanvas(math.floor(width + 0.5), math.floor(height + 0.5) ) -- Snap to grid
 				self.canvas = canvas
 			end
+			local previouscanvas = love.graphics.getCanvas()
 			love.graphics.setCanvas(canvas)
-			love.graphics.clear(0, 0, 0, 0) -- Transparent
-			self:render(math.floor(self:getscreenx() - self:getrenderx() ), math.floor(self:getscreeny() - self:getrendery() ) ) -- Snap to grid
-			love.graphics.setCanvas(nil)
+				love.graphics.clear(0, 0, 0, 0) -- Transparent
+				self:render(math.floor(self:getscreenx() - self:getrenderx() ), math.floor(self:getscreeny() - self:getrendery() ) ) -- Snap to grid
+			love.graphics.setCanvas(previouscanvas)
 		else
 			self.canvas = nil
 		end
